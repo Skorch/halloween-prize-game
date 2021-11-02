@@ -1,17 +1,30 @@
+import pi
 import pygame
-import os
 import glob
 import random
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger()
+# logger.setLevel(logging.DEBUG)
+
 pygame.font.init()
 pygame.mixer.init()
 
-FPS = 3
-STEP_RATE = 10
-MAX_FPS = 15
+FPS = 60
+TICK_RATE = 10
+STEP_RATE_CURVE = [4, 4, 2, 0, 0, 2, 0, 2, 2, 0, 2]
+MIN_TICK = 2
+
+CANDY_FOLDER = "assets/candy/*"
+FULL_SIZE_FOLDER = "assets/fullsize/*"
+
+START_TEXT = "PRESS BUTTON TO START"
 
 WINNER_FONT = pygame.font.SysFont('comicsans', 100)
-WIDTH, HEIGHT = 900, 500
-WIN = pygame.display.set_mode((WIDTH, HEIGHT))
+WIDTH, HEIGHT = 1000, 666
+WIN = pygame.display.set_mode((WIDTH, HEIGHT) , pygame.FULLSCREEN)
+# WIN = pygame.display.set_mode((WIDTH, HEIGHT) )
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
@@ -19,15 +32,31 @@ RED = (255, 0, 0)
 pygame.display.set_caption("First Game!")
 
 
-images = glob.glob("assets/candy/*.png")
-winner_filename = images[0]
-BACKGROUND = pygame.image.load("assets/background.jpeg")
+candy_assets = glob.glob(CANDY_FOLDER)
+fullsize_assets = glob.glob(FULL_SIZE_FOLDER)
 
+images = []
+is_big_button_pressed = False
+is_playing = False
+
+def setup_images():
+    global images
+
+    images = candy_assets
+
+    if pi.is_switch_on():
+        images += fullsize_assets
+
+
+def button_press(ev):
+    global is_big_button_pressed
+    logger.debug(f"button pressed: {ev}")
+    is_big_button_pressed = True
 
 def show_image(filename):
-    print(f"filename: {filename}")
+    logger.debug(f"filename: {filename}")
     image = pygame.image.load(filename)
-    
+    image = pygame.transform.scale(image, (WIDTH, HEIGHT))    
     # pygame.draw.rect(WIN, BLACK, BORDER)
     WIN.blit(image, (0, 0))
 
@@ -63,71 +92,110 @@ def try_button_light():
     if can_show_light:
         light = pygame.Rect(10, 10, 100, 100)
         pygame.draw.rect(WIN, RED, light)
-        print("draw light")
+        logger.debug("draw light")
 
     return can_show_light  
 
-def winner(text):
+def end_game(text, winning):
 
-    draw_text = WINNER_FONT.render(text, 1, WHITE)
-    WIN.blit(draw_text, (WIDTH/2 - draw_text.get_width() /
-                         2, HEIGHT/2 - draw_text.get_height()/2))
+    if text:
+        draw_text = WINNER_FONT.render(text, 1, WHITE)
+        WIN.blit(draw_text, (WIDTH/2 - draw_text.get_width() /
+                            2, HEIGHT/2 - draw_text.get_height()/2))
+    if winning:
+        pi.play_winner() 
+    else:
+        pi.play_loser()
+
     pygame.display.update()
     pygame.time.delay(5000)
 
-def loser(text):
+def reset_game():
+    global is_big_button_pressed, is_playing
 
-    draw_text = WINNER_FONT.render(text, 1, WHITE)
+    is_big_button_pressed = False
+    is_playing = False
+    clear_screen()
+    draw_text = WINNER_FONT.render(START_TEXT, 1, WHITE)
     WIN.blit(draw_text, (WIDTH/2 - draw_text.get_width() /
                          2, HEIGHT/2 - draw_text.get_height()/2))
+
     pygame.display.update()
-    pygame.time.delay(5000)
 
-def next_fps(current_fps, increment):
+def start_game():
+    global is_big_button_pressed, is_playing
 
-    print(f"(current, next): {current_fps}, {increment}")
+    is_big_button_pressed = False
+    is_playing = True
 
-    next_increase = increment % STEP_RATE
-    step = 1 if next_increase == 0 else 0
-    current_fps = min( current_fps + step, MAX_FPS)
+    setup_images()
 
-    return current_fps, increment+1
+
+def exit():
+    pi.clean()
+    run = False
+    pygame.quit()
 
 def main():
+
+    global is_big_button_pressed
+
+    pi.gpio_setup(button_press)
+    reset_game()
 
     clock = pygame.time.Clock()
     run = True
     filename = None
 
-    current_fps = FPS
-    next_increase = 0
+    step_index = 0
+    current_tick = 0
+    current_tick_rate = TICK_RATE
 
     while run:
-        print("tick")
-        clock.tick(current_fps)
-        current_fps, next_increase = next_fps(current_fps, next_increase)
+        # logger.debug(f"tick {current_tick}")        
+        clock.tick(FPS)
+
+        current_tick += 1
 
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                run = False
-                pygame.quit()
+            if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
+                exit()
                 return
 
-        clear_screen()        
-        is_big_button_pressed = check_big_button()
-        filename = try_show_image(filename)
-        is_phase_1 = (filename)
-        is_phase_2 = try_button_light()        
+        if not is_playing:
+            if is_big_button_pressed:
+                start_game()
+                pygame.time.delay(1000)
+                is_big_button_pressed = False
+                current_tick = 0
 
-        if is_big_button_pressed:
-            clear_screen()
-            if filename == winner_filename and is_phase_2:
-                winner("FULL SIZE CANDY BAR!")
-            else:
-                loser("ITTY BITTY!")
+
+
+        if is_playing and is_big_button_pressed:
             
-            current_fps = FPS
-            next_increase = 0
+            end_game(None, filename in fullsize_assets)
+
+            current_tick_rate = TICK_RATE
+            current_tick = 0
+            reset_game()
+
+
+        # toggle LED twice as fast
+        if current_tick % (current_tick_rate/2) == 0:
+            is_on = pi.toggle_led()
+            if is_playing:
+                pi.play_beep(is_on, current_tick_rate)
+
+        if is_playing and current_tick % current_tick_rate == 0:
+
+            current_tick = 0
+            rate = STEP_RATE_CURVE[step_index]
+            step_index = min(step_index + 1, len(STEP_RATE_CURVE) - 1)
+            current_tick_rate = max( current_tick_rate - rate, MIN_TICK)
+
+            clear_screen()        
+            filename = try_show_image(filename)
+            
 
         pygame.display.update()
 
