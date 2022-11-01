@@ -1,6 +1,8 @@
 import RPi.GPIO as GPIO 
 import time
 
+# from pi2 import BUZZER_PIN
+
 CL = [0, 131, 147, 165, 175, 196, 211, 248] 
 CM = [0, 262, 294, 330, 350, 393, 441, 495] 
 CH = [0, 525, 589, 661, 700, 786, 882, 990]
@@ -61,3 +63,20 @@ def setup_buzzer(pin = 25, mute = False):
 # Numbers GPIOs by physical location # Set pins' mode is output
 # Assign a global variable to replace GPIO.PWM # 440 is initial frequency.
     # Buzz.start(50)    
+
+if __name__ == '__main__':
+    GPIO.setmode(GPIO.BCM)
+    # Set LedPin's mode to output,and initial level to High(3.3v)
+    setup_buzzer(pin=25, mute=False)
+    sound_index = 0 #int(current_tick_rate/len(pi_sound.tick_sounds))-1
+
+    print("starting sound")
+    play_sounds(winning_sound)
+    play_sounds(losing_sound)
+
+    # start_sound(tick_sounds[sound_index])
+    # print("sleeping")
+    # time.sleep(5)
+    # stop_sound()
+    
+    GPIO.cleanup()

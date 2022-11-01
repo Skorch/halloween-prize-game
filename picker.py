@@ -1,17 +1,22 @@
-import pi
+dev = True
+if not dev:
+    import pi
+else:
+    import pi_dev as pi
+
 import pygame
 import glob
 import random
 import logging
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG if dev else logging.INFO)
 logger = logging.getLogger()
 # logger.setLevel(logging.DEBUG)
 
 pygame.font.init()
 pygame.mixer.init()
 
-FPS = 60
+FPS = 20 if dev else 60
 TICK_RATE = 10
 STEP_RATE_CURVE = [4, 4, 2, 0, 0, 2, 0, 2, 2, 0, 2]
 MIN_TICK = 2
@@ -37,6 +42,7 @@ fullsize_assets = glob.glob(FULL_SIZE_FOLDER)
 
 images = []
 is_big_button_pressed = False
+is_starting = False
 is_playing = False
 
 def setup_images():
@@ -47,6 +53,7 @@ def setup_images():
     if pi.is_switch_on():
         images += fullsize_assets
 
+    logger.debug(f"images: {images}")
 
 def button_press(ev):
     global is_big_button_pressed
@@ -67,10 +74,25 @@ def get_new_image(prev_filename):
     return next_filename if next_filename != prev_filename else get_new_image(prev_filename)
 
 def check_big_button():
+
+    global is_big_button_pressed, is_starting
+
+    if dev and not is_starting:
+
+        keys_pressed = pygame.key.get_pressed()
+
     
-    keys_pressed = pygame.key.get_pressed()
-    
-    return keys_pressed[pygame.K_SPACE]
+        is_big_button_pressed = keys_pressed[pygame.K_SPACE]
+
+        if is_big_button_pressed:   
+            logger.info(f"space {keys_pressed[pygame.K_SPACE]}")
+
+    return is_big_button_pressed
+
+def reset_big_button():
+    global is_big_button_pressed
+    is_big_button_pressed = False
+
 
 def clear_screen():
     # WIN.blit(BACKGROUND, (0,0))
@@ -83,6 +105,9 @@ def try_show_image(filename):
     if can_show_image:
         filename = get_new_image(filename)
         show_image(filename)
+        logger.debug(f"showing {filename}")
+    else:
+        logger.debug("can't show image")
 
     return filename
 
@@ -125,6 +150,7 @@ def reset_game():
 def start_game():
     global is_big_button_pressed, is_playing
 
+    logger.debug(f"starting game")
     is_big_button_pressed = False
     is_playing = True
 
@@ -138,7 +164,7 @@ def exit():
 
 def main():
 
-    global is_big_button_pressed
+    global is_big_button_pressed, is_starting
 
     pi.gpio_setup(button_press)
     reset_game()
@@ -152,10 +178,12 @@ def main():
     current_tick_rate = TICK_RATE
 
     while run:
-        # logger.debug(f"tick {current_tick}")        
+        logger.debug(f"tick {current_tick}")  
+        logger.debug(f"clofk fps {FPS}")  
         clock.tick(FPS)
 
         current_tick += 1
+
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
@@ -163,15 +191,21 @@ def main():
                 return
 
         if not is_playing:
-            if is_big_button_pressed:
+            logger.debug("not is_playing")
+            if check_big_button():
+                is_starting = True
                 start_game()
+                reset_big_button()
                 pygame.time.delay(1000)
-                is_big_button_pressed = False
                 current_tick = 0
+        else:
+            is_starting = False
 
 
+        global is_big_button_pressed
 
-        if is_playing and is_big_button_pressed:
+        if is_playing and check_big_button():
+            logger.debug("is_playing and check_big_button")
             
             end_game(None, filename in fullsize_assets)
 
@@ -182,11 +216,14 @@ def main():
 
         # toggle LED twice as fast
         if current_tick % (current_tick_rate/2) == 0:
+            logger.debug("double time LED")
             is_on = pi.toggle_led()
             if is_playing:
                 pi.play_beep(is_on, current_tick_rate)
 
         if is_playing and current_tick % current_tick_rate == 0:
+            is_starting = False
+            logger.debug("screen update")
 
             current_tick = 0
             rate = STEP_RATE_CURVE[step_index]
