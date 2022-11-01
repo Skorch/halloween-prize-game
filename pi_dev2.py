@@ -16,7 +16,7 @@ button_event = None
 
 def gpio_setup(button_press):
 
-    logging.info("***Setting up GPIO")
+    logging.info("***Setting up FAKE GPIO")
 
     global button_event, switch_on
 

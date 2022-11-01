@@ -4,11 +4,12 @@ import time
 import pi_sound
 
 import logging
+from buttonhandler import ButtonHandler
 logger = logging.getLogger()
 
 
 LED_PIN = 21
-BUTTON_PIN = 27
+BUTTON_PIN = 20
 BUZZER_PIN = 25
 SWITCH_PIN = 13
 FLASH_FREQ = 0.1
@@ -22,7 +23,7 @@ def gpio_setup(button_press):
 
     global button_event, switch_on
 
-    button_event = button_press
+
     # Set the GPIO modes to BCM Numbering
     GPIO.setmode(GPIO.BCM)
     # Set LedPin's mode to output,and initial level to High(3.3v)
@@ -32,22 +33,36 @@ def gpio_setup(button_press):
     GPIO.setup(BUTTON_PIN, GPIO.IN)
     pi_sound.setup_buzzer(pin=BUZZER_PIN, mute=False)
 
-    GPIO.add_event_detect(BUTTON_PIN, GPIO.BOTH, callback=button_event)
+    # button_event = ButtonHandler(pin=BUTTON_PIN, edge=GPIO.BOTH, func=button_press)
+    # button_event.start()
+    # GPIO.add_event_detect(BUTTON_PIN, GPIO.RISING, callback=button_event)
 
-def is_switch_on():
-    return True
-    switch_on = GPIO.input(SWITCH_PIN)
-    logger.debug(f"== switch state {switch_on}")
+    # GPIO.add_event_detect(BUTTON_PIN, GPIO.BOTH, callback=button_event, bouncetime=100)
+    GPIO.add_event_detect(BUTTON_PIN, GPIO.BOTH, callback=button_press)
+    # GPIO.add_event_detect(channel, GPIO.RISING, callback=my_callback, bouncetime=200)
 
-    return switch_on
+def button_state():
+    return GPIO.input(BUTTON_PIN)
 
-def is_button_pressed(test):
+def is_button_pressed():
 
-    button_on = GPIO.input(BUTTON_PIN)
-    logger.debug(f"== switch state {button_on}")
+    button_on = GPIO.input(BUTTON_PIN) == 1
 
-    return button_on or test
+    return button_on 
 
+def led_on():
+    global LED_ON
+    LED_ON = True
+    # logger.debug(f"LED: {LED_ON}")
+    GPIO.output(LED_PIN, LED_ON)
+    return LED_ON
+
+def led_off():
+    global LED_ON
+    LED_ON = False
+    # logger.debug(f"LED: {LED_ON}")
+    GPIO.output(LED_PIN, LED_ON)
+    return LED_ON
 def toggle_led():
     global LED_ON
     LED_ON = not LED_ON
@@ -60,6 +75,16 @@ def play_winner():
 
 def play_loser():
     pi_sound.play_sounds(pi_sound.losing_sound)
+
+def start_beep(ticker_index):
+    sound_index = ticker_index
+    sound_type = pi_sound.tick_sounds[sound_index]
+    
+    logger.debug(f"beep on of type {sound_type}")
+    
+    pi_sound.start_sound(sound_type)
+def stop_beep():
+    pi_sound.stop_sound()
 
 def play_beep(is_on, current_tick_rate):
     # if current_tick_rate <= 10:
@@ -75,4 +100,5 @@ def play_beep(is_on, current_tick_rate):
         pi_sound.stop_sound()
 
 def clean():
+    logger.info("cleaning GPIO")
     GPIO.cleanup()

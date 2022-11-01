@@ -10,10 +10,19 @@ PLAYDOUGH_FOLDER = "assets/playdough/*"
 CANDY_FOLDER = "assets/candy/*"
 FULL_SIZE_FOLDER = "assets/fullsize/*"
 
+default_volume = 0.05
+
 titles = {
     "playdough": "Playdough",
     "full_size": "Full Sized",
     "mini": "Mini Candy"
+}
+
+sounds = {
+    "playdough": pygame.mixer.Sound("sounds/small_prize.wav"),
+    "full_size": pygame.mixer.Sound("sounds/big_prize.wav"),
+    "mini": pygame.mixer.Sound("sounds/small_prize.wav"),
+    "beep": pygame.mixer.Sound("sounds/beep.wav")
 }
 
 prize_probability = {
@@ -29,7 +38,8 @@ assets = {
 }
 
 
-STEP_RATE_CURVE = [1.0, 1.0, 0.75, 0.75, 0.75, 0.5, 0.5, 0.5, 0.5, 0.25, 0.25, 0.25, 0.25, 0.1]
+
+STEP_RATE_CURVE = [1.0, 1.0, 0.75, 0.75, 0.75, 0.5, 0.5, 0.5, 0.5, 0.25, 0.25, 0.25, 0.25, 0.2, 0.2, 0.2, 0.15, 0.15, 0.15, 0.15, 0.1]
 MIN_FULL_SIZE_TICK = 4
 
 class CandyPicker(State):
@@ -43,6 +53,11 @@ class CandyPicker(State):
         self.get_new_image()
         self.last_image_update = time()
 
+        for sound_key in sounds:
+            sounds[sound_key].set_volume(default_volume)
+        
+        
+        
         
     def update(self, delta_time, actions):
 
@@ -56,14 +71,19 @@ class CandyPicker(State):
             now = time()
             dt = self.next_image_time - now
             dt_beep = self.next_beep_time - now
+            dt_led = self.next_led_time - now
             # print(f"candy picker update dt={dt}")
-            logger.debug(f"dt_beep: {dt_beep}; dt: {dt}")    
+            # logger.debug(f"dt_led: {dt_led}; dt: {dt}")    
 
             if dt <= 0:
                 self.get_new_image()
+                # logger.debug(f"turning LED off for {dt_led}")
+                self.led_on()
                 self.play_beep()
-            elif dt_beep <= 0:
-                self.stop_beep()
+            elif dt_led <=0:
+                # logger.debug(f"turning LED off after {dt_led}")
+                self.led_off()
+            
             # pass
 
     def render(self, surface):
@@ -103,7 +123,8 @@ class CandyPicker(State):
         return {
             "type": pick,
             "filename": next_filename,
-            "title": titles[pick]
+            "title": titles[pick],
+            "sound": sounds[pick]
         }
 
 
@@ -115,16 +136,25 @@ class CandyPicker(State):
         next_step = self.get_step_rate()
         self.next_image_time = time() + next_step
         self.next_beep_time = time() + next_step/2.0
+        self.next_led_time = time() + next_step/2.0
         self.current_tick += 1
-        print(f"next tick time: {self.next_image_time}")
-        print(f"next beep time: {self.next_beep_time}")
+        # print(f"next tick time: {self.next_image_time}")
+        # print(f"next beep time: {self.next_beep_time}")
 
         self.current_prize = self.pick_prize()
 
-    def play_beep(self):
-        self.game.beep_on()
+
+    def led_on(self):
         self.game.led_on()
 
-    def stop_beep(self):
-        self.game.beep_off()
+    def led_off(self):
         self.game.led_off()
+        
+    def play_beep(self):
+        beep = sounds["beep"]
+        self.game.play_sound(beep)
+
+        
+        # self.game.beep_on(self.current_tick)
+        # self.game.led_on()
+
