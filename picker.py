@@ -22,7 +22,7 @@ STEP_RATE_CURVE = [4, 4, 2, 0, 0, 2, 0, 2, 2, 0, 2]
 MIN_TICK = 2
 
 CANDY_FOLDER = "assets/candy/*"
-FULL_SIZE_FOLDER = "assets/fullsize/*"
+FULL_SIZE_FOLDER = "assets/skull/*"
 
 START_TEXT = "PRESS BUTTON TO START"
 
