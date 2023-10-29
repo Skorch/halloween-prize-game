@@ -23,7 +23,7 @@ class Title(State):
             
     def render(self, surface):
         # 1. Loading and displaying the background image
-        bg_image_filename = "assets/background.jpeg"  # Update this with your image's path
+        bg_image_filename = "assets/background1.png"  # Update this with your image's path
         bg_image = pygame.image.load(bg_image_filename)
         bg_image = pygame.transform.scale(bg_image, self.game.GAME_DIMENSIONS)
         surface.blit(bg_image, (0, 0))
