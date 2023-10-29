@@ -8,8 +8,8 @@ from buttonhandler import ButtonHandler
 logger = logging.getLogger()
 
 
-LED_PIN = 21
-BUTTON_PIN = 20
+LED_PIN = 18
+BUTTON_PIN = 3
 BUZZER_PIN = 25
 SWITCH_PIN = 13
 FLASH_FREQ = 0.1
@@ -29,9 +29,9 @@ def gpio_setup(button_press):
     # Set LedPin's mode to output,and initial level to High(3.3v)
 
     GPIO.setup(LED_PIN, GPIO.OUT, initial=GPIO.HIGH)
-    GPIO.setup(SWITCH_PIN, GPIO.OUT)
+#    GPIO.setup(SWITCH_PIN, GPIO.OUT)
     GPIO.setup(BUTTON_PIN, GPIO.IN)
-    pi_sound.setup_buzzer(pin=BUZZER_PIN, mute=False)
+#    pi_sound.setup_buzzer(pin=BUZZER_PIN, mute=False)
 
     # button_event = ButtonHandler(pin=BUTTON_PIN, edge=GPIO.BOTH, func=button_press)
     # button_event.start()
@@ -54,14 +54,14 @@ def led_on():
     global LED_ON
     LED_ON = True
     # logger.debug(f"LED: {LED_ON}")
-    GPIO.output(LED_PIN, LED_ON)
+    GPIO.output(LED_PIN, GPIO.HIGH)
     return LED_ON
 
 def led_off():
     global LED_ON
     LED_ON = False
     # logger.debug(f"LED: {LED_ON}")
-    GPIO.output(LED_PIN, LED_ON)
+    GPIO.output(LED_PIN, GPIO.LOW)
     return LED_ON
 def toggle_led():
     global LED_ON
@@ -102,3 +102,19 @@ def play_beep(is_on, current_tick_rate):
 def clean():
     logger.info("cleaning GPIO")
     GPIO.cleanup()
+
+
+def press():
+    print("button press")
+    pass
+if __name__ == "__main__":
+    print("testing gpio")
+    gpio_setup(press)
+    while True:
+        print("opn")
+        led_on()
+        time.sleep(1)
+        print("off")
+        led_off()
+        
+        

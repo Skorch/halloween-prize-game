@@ -8,8 +8,10 @@ from states.title import Title
 dev = False
 if not dev:
     import pi2 as pi
+    print("prod")
 else:
     import pi_dev2 as pi
+    print("dev")
 
 BUTTONS_SPACE = "space"
 BUTTONS_BUTTON = "button"
