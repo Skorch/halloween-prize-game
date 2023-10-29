@@ -37,6 +37,8 @@ assets = {
     "mini": glob.glob(CANDY_FOLDER)
 }
 
+cached_assets = {}
+
 
 
 STEP_RATE_CURVE = [1.0, 1.0, 0.75, 0.75, 0.75, 0.5, 0.5, 0.5, 0.5, 0.25, 0.25, 0.25, 0.25, 0.2, 0.2, 0.2, 0.15, 0.15, 0.15, 0.15, 0.1]
@@ -87,6 +89,7 @@ class CandyPicker(State):
             # pass
                 
     def render(self, surface, limit_vertical=False):
+        global cached_assets
         # Clearing the screen by filling with a background color
         BLACK = (0, 0, 0)  # RGB value for black
         surface.fill(BLACK)
@@ -95,26 +98,31 @@ class CandyPicker(State):
             filename = self.current_prize["filename"]
             prize_text = self.current_prize["title"]
 
-            image = pygame.image.load(filename)
-            image_width, image_height = image.get_size()
-            aspect_ratio = image_width / image_height
-
-            if limit_vertical:
-                # Scale based on the game's height
-                new_height = self.game.GAME_H
-                new_width = int(new_height * aspect_ratio)
+            if filename in cached_assets:
+                image = cached_assets[filename]
             else:
-                # Scale based on the game's width
-                new_width = self.game.GAME_W
-                new_height = int(new_width / aspect_ratio)
+                image = pygame.image.load(filename)
+                image_width, image_height = image.get_size()
+                aspect_ratio = image_width / image_height
 
-            image = pygame.transform.scale(image, (new_width, new_height))
+                if limit_vertical:
+                    # Scale based on the game's height
+                    new_height = self.game.GAME_H
+                    new_width = int(new_height * aspect_ratio)
+                else:
+                    # Scale based on the game's width
+                    new_width = self.game.GAME_W
+                    new_height = int(new_width / aspect_ratio)
 
-            # Clipping (for width only)
-            if new_width > self.game.GAME_W:
-                x_offset = (new_width - self.game.GAME_W) // 2
-                image = image.subsurface(pygame.Rect(x_offset, 0, self.game.GAME_W, new_height))
+                
+                image = pygame.transform.smoothscale(image, (new_width, new_height))
 
+                # Clipping (for width only)
+                if new_width > self.game.GAME_W:
+                    x_offset = (new_width - self.game.GAME_W) // 2
+                    image = image.subsurface(pygame.Rect(x_offset, 0, self.game.GAME_W, new_height))
+
+                cached_assets[filename] = image
             # Blit the image and text overlay
             surface.blit(image, (0, 0))
 
