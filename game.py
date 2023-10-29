@@ -26,7 +26,7 @@ class Game():
         pygame.init()
         self.GAME_W, self.GAME_H = int(480),int(270)
         self.GAME_DIMENSIONS = (self.GAME_W,self.GAME_H)
-        self.SCREEN_WIDTH, self.SCREEN_HEIGHT = int(960), int(540)
+        self.SCREEN_WIDTH, self.SCREEN_HEIGHT = int(1920), int(1080)
         self.SCREEN_DIMENSIONS = (self.SCREEN_WIDTH, self.SCREEN_HEIGHT)
         self.pi = pi
         self.pi.gpio_setup(self.button_press)

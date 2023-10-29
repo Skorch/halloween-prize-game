@@ -23,14 +23,35 @@ class Winner(State):
 
         self.game.reset_keys()
 
-    def render(self, surface):
+    def render(self, surface, limit_vertical=False):
         # surface.set_alpha(0.6)
 
         if not self.has_rendered:
             filename = self.prize["filename"]
             prize_text = self.prize["title"]
+
             image = pygame.image.load(filename)
-            image = pygame.transform.scale(image, self.game.GAME_DIMENSIONS)    
+            image_width, image_height = image.get_size()
+            aspect_ratio = image_width / image_height
+
+            if limit_vertical:
+                # Scale based on the game's height
+                new_height = self.game.GAME_H
+                new_width = int(new_height * aspect_ratio)
+            else:
+                # Scale based on the game's width
+                new_width = self.game.GAME_W
+                new_height = int(new_width / aspect_ratio)
+
+            image = pygame.transform.scale(image, (new_width, new_height))
+
+            # Clipping (for width only)
+            if new_width > self.game.GAME_W:
+                x_offset = (new_width - self.game.GAME_W) // 2
+                image = image.subsurface(pygame.Rect(x_offset, 0, self.game.GAME_W, new_height))
+
+            # image = pygame.image.load(filename)
+            # image = pygame.transform.scale(image, self.game.GAME_DIMENSIONS)    
             surface.blit(image, (0, 0))
 
 

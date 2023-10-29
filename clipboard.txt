@@ -1,0 +1,39 @@
+def render(self, surface, limit_vertical=True):
+    # Clearing the screen by filling with a background color
+    BLACK = (0, 0, 0)  # RGB value for black
+    surface.fill(BLACK)
+
+    if self.current_prize:
+        filename = self.current_prize["filename"]
+        prize_text = self.current_prize["title"]
+
+        image = pygame.image.load(filename)
+        image_width, image_height = image.get_size()
+        aspect_ratio = image_width / image_height
+
+        if limit_vertical:
+            # Scale based on the game's height
+            new_height = self.game.GAME_H
+            new_width = int(new_height * aspect_ratio)
+        else:
+            # Scale based on the game's width
+            new_width = self.game.GAME_W
+            new_height = int(new_width / aspect_ratio)
+
+        image = pygame.transform.scale(image, (new_width, new_height))
+
+        # Clipping (for width only)
+        if new_width > self.game.GAME_W:
+            x_offset = (new_width - self.game.GAME_W) // 2
+            image = image.subsurface(pygame.Rect(x_offset, 0, self.game.GAME_W, new_height))
+
+        # Blit the image and text overlay
+        surface.blit(image, (0, 0))
+
+        fill_rect = (self.game.GAME_W, self.game.GAME_H/4)
+        fill_position = (0, self.game.GAME_H*3/4)
+        text_color = TEXT_COLOR_1
+        fill_color = TEXT_BG_1
+        fill_alpha = 200
+        self.game.draw_text(surface, prize_text, text_color, self.game.GAME_W/2, self.game.GAME_H*7/8, fill_rect=fill_rect, fill_position=fill_position, fill_color=fill_color, fill_alpha=fill_alpha)
+
