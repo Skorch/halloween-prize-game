@@ -24,9 +24,10 @@ BUTTON_DELAY = 1.3
 class Game():
     def __init__(self) -> None:
         pygame.init()
-        self.GAME_W, self.GAME_H = int(480),int(270)
+        display_info = pygame.display.Info()
+        self.GAME_W, self.GAME_H = display_info.current_w, display_info.current_h #int(480),int(270)
         self.GAME_DIMENSIONS = (self.GAME_W,self.GAME_H)
-        self.SCREEN_WIDTH, self.SCREEN_HEIGHT = int(1920), int(1080)
+        self.SCREEN_WIDTH, self.SCREEN_HEIGHT = self.GAME_W, self.GAME_H #int(1920), int(1080)
         self.SCREEN_DIMENSIONS = (self.SCREEN_WIDTH, self.SCREEN_HEIGHT)
         self.pi = pi
         self.pi.gpio_setup(self.button_press)

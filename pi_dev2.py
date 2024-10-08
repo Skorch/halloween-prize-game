@@ -26,7 +26,24 @@ def is_button_pressed(test = False):
 def is_switch_on(test = False):
     return test
 
+def led_on():
+    global LED_ON
+    LED_ON = True
+    # logger.debug(f"LED: {LED_ON}")
 
+    logger.info(f"LED {LED_ON}")
+
+    return LED_ON
+    
+def led_off():
+    global LED_ON
+    LED_ON = False
+    # logger.debug(f"LED: {LED_ON}")
+
+    logger.info(f"LED {LED_ON}")
+
+    return LED_ON
+    
 def toggle_led():
     global LED_ON
     LED_ON = not LED_ON
