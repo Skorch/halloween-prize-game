@@ -9,7 +9,7 @@ logger = logging.getLogger()
 
 
 LED_PIN = 18
-BUTTON_PIN = 3
+BUTTON_PIN = 17
 BUZZER_PIN = 25
 SWITCH_PIN = 13
 FLASH_FREQ = 0.1
