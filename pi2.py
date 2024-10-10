@@ -8,7 +8,7 @@ from buttonhandler import ButtonHandler
 logger = logging.getLogger()
 
 
-LED_PIN = 18
+LED_PIN = 27
 BUTTON_PIN = 17
 BUZZER_PIN = 25
 SWITCH_PIN = 13

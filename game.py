@@ -25,17 +25,19 @@ class Game():
     def __init__(self) -> None:
         pygame.init()
         display_info = pygame.display.Info()
-        self.GAME_W, self.GAME_H = display_info.current_w, display_info.current_h #int(480),int(270)
+        self.GAME_W, self.GAME_H = 1024,768 
+        # display_info.current_w, display_info.current_h #int(480),int(270)
         self.GAME_DIMENSIONS = (self.GAME_W,self.GAME_H)
         self.SCREEN_WIDTH, self.SCREEN_HEIGHT = self.GAME_W, self.GAME_H #int(1920), int(1080)
         self.SCREEN_DIMENSIONS = (self.SCREEN_WIDTH, self.SCREEN_HEIGHT)
         self.pi = pi
+        
         self.pi.gpio_setup(self.button_press)
         # print("setting canvas")
         self.game_canvas = pygame.Surface(self.GAME_DIMENSIONS)
         # print("setting screen")
         # self.screen = pygame.display.set_mode(self.SCREEN_DIMENSIONS)
-        self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+        self.screen = pygame.display.set_mode(self.SCREEN_DIMENSIONS, pygame.FULLSCREEN)
         # print("variables")
 
         self.running, self.playing = True, True
@@ -182,6 +184,9 @@ class Game():
         self.pi.stop_beep()
 
         
+    def toggle_led(self):
+        # logger.debug("led on")
+        self.pi.toggle_led()
     def led_on(self):
         # logger.debug("led on")
         self.pi.led_on()
