@@ -19,8 +19,8 @@ titles = {
 }
 
 sounds = {
-    "playdough": pygame.mixer.Sound("sounds/small_prize.wav"),
-    "full_size": pygame.mixer.Sound("sounds/big_prize.wav"),
+    "playdough": pygame.mixer.Sound("sounds/small_prize_play.wav"),
+    "full_size": pygame.mixer.Sound("sounds/big_prize_new.wav"),
     "mini": pygame.mixer.Sound("sounds/small_prize_candy.wav"),
     "beep": pygame.mixer.Sound("sounds/prize-game-sound-2.wav")
 }
