@@ -5,7 +5,7 @@ import pygame
 
 from states.title import Title
 
-dev = False
+dev = True
 if not dev:
     import pi2 as pi
     print("prod")

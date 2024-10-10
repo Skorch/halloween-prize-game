@@ -21,8 +21,8 @@ titles = {
 sounds = {
     "playdough": pygame.mixer.Sound("sounds/small_prize.wav"),
     "full_size": pygame.mixer.Sound("sounds/big_prize.wav"),
-    "mini": pygame.mixer.Sound("sounds/small_prize.wav"),
-    "beep": pygame.mixer.Sound("sounds/beep.wav")
+    "mini": pygame.mixer.Sound("sounds/small_prize_candy.wav"),
+    "beep": pygame.mixer.Sound("sounds/prize-game-sound-2.wav")
 }
 
 prize_probability = {
