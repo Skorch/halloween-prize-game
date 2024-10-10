@@ -53,6 +53,15 @@ def toggle_led():
 
     return LED_ON
 
+def set_rgb_leds(colors):
+
+    logger.info(f"rgb set to {colors}")
+
+
+def clear_rgb_leds():
+    logger.info(f"rgb cleared")
+
+
 def play_winner():
     logger.info("Winner Sound")
     return

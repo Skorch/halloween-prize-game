@@ -43,7 +43,9 @@ cached_assets = {}
 
 STEP_RATE_CURVE = [0.75, 0.75, 0.75, 0.5, 0.5, 0.5, 0.5, 0.25, 0.25, 0.25, 0.25, 0.2, 0.2, 0.2, 0.15, 0.15, 0.15, 0.15, 0.1]
 MIN_FULL_SIZE_TICK = 5
-
+GREEN = (0, 255, 0)
+OFF = (0, 0, 0)
+RGB_COLOR_SEQUENCE = [[GREEN, OFF, OFF, OFF], [OFF, GREEN, OFF, OFF], [OFF, OFF, GREEN, OFF], [OFF, OFF, OFF, GREEN]]
 class CandyPicker(State):
 
     def __init__(self, game) -> None:
@@ -51,6 +53,8 @@ class CandyPicker(State):
 
         self.current_prize = None
         self.current_tick = 0
+        self.current_rgb_index = 0
+
 
         self.get_new_image()
         self.last_image_update = time()
@@ -72,11 +76,15 @@ class CandyPicker(State):
 
             now = time()
             dt = self.next_image_time - now
-            dt_beep = self.next_beep_time - now
+            dt_rgb = self.next_rgb_time - now
             dt_led = self.next_led_time - now
             # print(f"candy picker update dt={dt}")
             # logger.debug(f"dt_led: {dt_led}; dt: {dt}")    
 
+            if dt_rgb <= 0:
+                self.update_rgb()
+                self.next_rgb_time = time() + self.get_step_rate()/4.0
+                
             if dt <= 0:
                 self.get_new_image()
                 # logger.debug(f"turning LED off for {dt_led}")
@@ -184,6 +192,7 @@ class CandyPicker(State):
     def get_new_image(self):
 
         next_step = self.get_step_rate()
+        self.next_rgb_time = time() + next_step/4.0
         self.next_image_time = time() + next_step
         self.next_beep_time = time() + next_step/2.0
         self.next_led_time = time() + next_step/2.0
@@ -204,7 +213,17 @@ class CandyPicker(State):
         beep = sounds["beep"]
         self.game.play_sound(beep)
 
+    #cycle through a sequence of 4 turning each LED on with a spooky green RGB color
+    
+    
+    def update_rgb(self):
+        #show the LED then increment the index looping back to 0 when it reaches 4
+        colors = RGB_COLOR_SEQUENCE[self.current_rgb_index]
+        self.game.set_rgb_leds(colors)
+        self.current_rgb_index = (self.current_rgb_index + 1) % self.game.rgb_count
+        # print(f"current_rgb_index: {self.current_rgb_index}")
         
-        # self.game.beep_on(self.current_tick)
-        # self.game.led_on()
+
+        
+        
 

@@ -5,7 +5,7 @@ import pygame
 
 from states.title import Title
 
-dev = True
+dev = False
 if not dev:
     import pi2 as pi
     print("prod")
@@ -20,6 +20,7 @@ BUTTONS_ESCAPE = "escape"
 BUTTON_PRESS_EVENT = pygame.USEREVENT + 1
 BUTTON_RELEASE_EVENT = pygame.USEREVENT + 2
 BUTTON_DELAY = 1.3
+RGB_COUNT = 4
 
 class Game():
     def __init__(self) -> None:
@@ -43,7 +44,7 @@ class Game():
         self.running, self.playing = True, True
         self.button_pressed = False
         self.button_last_time = time()
-        
+        self.rgb_count = RGB_COUNT
         self.actions = {
             BUTTONS_SPACE: False, 
             BUTTONS_BUTTON: False,
@@ -195,6 +196,14 @@ class Game():
         # logger.debug("led off")
         self.pi.led_off()
 
+    def set_rgb_leds(self, colors):
+        # logger.debug("set rgb leds")
+        self.pi.set_rgb_leds(colors)
+    
+    def clear_rgb_leds(self):
+        # logger.debug("clear rgb leds")
+        self.pi.clear_rgb_leds()
+        
 if __name__ == '__main__':
     g = Game()
     print("starting")

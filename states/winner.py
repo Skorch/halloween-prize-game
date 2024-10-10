@@ -20,7 +20,7 @@ class Winner(State):
             self.game.reset_states()
         if now - self.win_time >= RESET_DELAY:
             self.game.reset_states()
-
+        self.game.clear_rgb_leds()
         self.game.reset_keys()
 
     def render(self, surface, limit_vertical=False):
