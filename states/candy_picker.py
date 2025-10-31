@@ -1,10 +1,10 @@
-import pygame, os, glob, random
+import pygame, os, glob, random, math
 from time import time
 from picker import get_new_image
 from states.state import State
 from states.winner import Winner
 from colors import *
-from config import MESSAGES, PRIZES
+from config import MESSAGES, PRIZES, VISUAL
 from asyncio.log import logger
 
 # =============================================================================
@@ -87,9 +87,22 @@ class CandyPicker(State):
         self.current_tick = 0
         self.current_rgb_index = 0
 
+        # Timer initialization
+        if VISUAL.TIMER_ENABLED:
+            self.timer_start_time = time()
+            self.timer_remaining = VISUAL.TIMER_START_SECONDS
+            print(f"[TIMER] Initialized: duration={VISUAL.TIMER_START_SECONDS}s, show_at={VISUAL.TIMER_SHOW_AT_SECONDS}s")
+            logger.info(f"Timer initialized: start_time={self.timer_start_time}, duration={VISUAL.TIMER_START_SECONDS}s")
+        else:
+            self.timer_start_time = None
+            self.timer_remaining = None
 
         self.get_new_image()
         self.last_image_update = time()
+
+        # Trigger LED and beep for the first image (subsequent images triggered in update())
+        self.led_on()
+        self.play_beep()
 
         # Sound volumes are already set at module level
         
@@ -97,8 +110,25 @@ class CandyPicker(State):
         
         
     def update(self, delta_time, actions):
+        # Update timer if enabled
+        timer_expired = False
+        if VISUAL.TIMER_ENABLED and self.timer_start_time is not None:
+            elapsed = time() - self.timer_start_time
+            self.timer_remaining = VISUAL.TIMER_START_SECONDS - elapsed
 
-        if actions["space"] or actions["button"]:
+            if self.timer_remaining <= 0:
+                self.timer_remaining = 0
+                timer_expired = True
+                print(f"[TIMER] EXPIRED! Auto-triggering winner screen")
+                logger.info("Timer expired! Auto-triggering winner screen")
+            elif self.timer_remaining <= VISUAL.TIMER_SHOW_AT_SECONDS:
+                # Only print every second to avoid spam
+                if int(self.timer_remaining) != getattr(self, '_last_printed_second', -1):
+                    self._last_printed_second = int(self.timer_remaining)
+                    print(f"[TIMER] Visible: {self.timer_remaining:.1f}s remaining")
+                logger.debug(f"Timer visible: {self.timer_remaining:.1f}s remaining")
+
+        if actions["space"] or actions["button"] or timer_expired:
             # self.stop_sound()
             new_state = Winner(self.game, self.current_prize)
             self.game.reset_keys()
@@ -110,12 +140,12 @@ class CandyPicker(State):
             dt_rgb = self.next_rgb_time - now
             dt_led = self.next_led_time - now
             # print(f"candy picker update dt={dt}")
-            # logger.debug(f"dt_led: {dt_led}; dt: {dt}")    
+            # logger.debug(f"dt_led: {dt_led}; dt: {dt}")
 
             if dt_rgb <= 0:
                 self.update_rgb()
                 self.next_rgb_time = time() + self.get_step_rate()/4.0
-                
+
             if dt <= 0:
                 self.get_new_image()
                 # logger.debug(f"turning LED off for {dt_led}")
@@ -124,7 +154,7 @@ class CandyPicker(State):
             elif dt_led <=0:
                 # logger.debug(f"turning LED off after {dt_led}")
                 self.led_off()
-            
+
             # pass
                 
     def render(self, surface, limit_vertical=False):
@@ -165,16 +195,30 @@ class CandyPicker(State):
             # Blit the image and text overlay
             surface.blit(image, (0, 0))
 
-            fill_rect = (self.game.GAME_W, self.game.GAME_H/4)
-            fill_position = (0, self.game.GAME_H*3/4)
-            text_color = TEXT_COLOR_1
-            fill_color = TEXT_BG_1
-            fill_alpha = 200
-            # Use configurable font size from MESSAGES config
-            font = self.game.get_font_by_size(MESSAGES.PICKER_MESSAGE_FONT_SIZE)
-            self.game.draw_text(surface, prize_text, text_color, self.game.GAME_W/2, self.game.GAME_H*7/8,
-                              fill_rect=fill_rect, fill_position=fill_position, fill_color=fill_color, fill_alpha=fill_alpha,
-                              font=font)
+            # Only show text if enabled in config
+            if VISUAL.SHOW_PRIZE_TEXT:
+                # Configure text background from VISUAL config
+                text_color = TEXT_COLOR_1
+                font = self.game.get_font_by_size(MESSAGES.PICKER_MESSAGE_FONT_SIZE)
+
+                if VISUAL.SHOW_TEXT_BACKGROUND:
+                    # Background is enabled - use configured opacity and height
+                    fill_rect = (self.game.GAME_W, self.game.GAME_H * VISUAL.TEXT_BG_HEIGHT_FRACTION)
+                    fill_position = (0, self.game.GAME_H * (1 - VISUAL.TEXT_BG_HEIGHT_FRACTION))
+                    fill_color = VISUAL.TEXT_BG_1
+                    fill_alpha = VISUAL.TEXT_BG_OPACITY
+                    self.game.draw_text(surface, prize_text, text_color, self.game.GAME_W/2, self.game.GAME_H*7/8,
+                                      fill_rect=fill_rect, fill_position=fill_position, fill_color=fill_color, fill_alpha=fill_alpha,
+                                      font=font)
+                else:
+                    # No background - just draw text
+                    self.game.draw_text(surface, prize_text, text_color, self.game.GAME_W/2, self.game.GAME_H*7/8,
+                                      font=font)
+
+        # Draw countdown timer if enabled and visible
+        if VISUAL.TIMER_ENABLED and self.timer_remaining is not None:
+            if self.timer_remaining <= VISUAL.TIMER_SHOW_AT_SECONDS:
+                self.draw_timer(surface)
 
 
 
@@ -265,8 +309,53 @@ class CandyPicker(State):
         self.game.set_rgb_leds(colors)
         self.current_rgb_index = (self.current_rgb_index + 1) % self.game.rgb_count
         # print(f"current_rgb_index: {self.current_rgb_index}")
-        
 
-        
-        
+    def draw_timer(self, surface):
+        """Draw countdown timer as text in a circle"""
+        # Calculate seconds remaining (round up to show whole seconds)
+        seconds = math.ceil(self.timer_remaining)
+        print(f"[TIMER] Drawing: {seconds}s at pos ({VISUAL.TIMER_POSITION_X}, {VISUAL.TIMER_POSITION_Y}), radius {VISUAL.TIMER_CIRCLE_RADIUS}")
+        logger.debug(f"Drawing timer: {seconds} seconds at ({VISUAL.TIMER_POSITION_X}, {VISUAL.TIMER_POSITION_Y})")
+
+        # Create a surface for the circle with alpha channel
+        circle_surface = pygame.Surface((VISUAL.TIMER_CIRCLE_RADIUS * 2, VISUAL.TIMER_CIRCLE_RADIUS * 2), pygame.SRCALPHA)
+
+        # Draw filled circle
+        pygame.draw.circle(
+            circle_surface,
+            (*VISUAL.TIMER_CIRCLE_COLOR, VISUAL.TIMER_CIRCLE_OPACITY),
+            (VISUAL.TIMER_CIRCLE_RADIUS, VISUAL.TIMER_CIRCLE_RADIUS),
+            VISUAL.TIMER_CIRCLE_RADIUS
+        )
+
+        # Calculate font size proportional to circle radius (about 60% of diameter)
+        font_size = int(VISUAL.TIMER_CIRCLE_RADIUS * 1.2)
+
+        # Create font for timer - use same font as game
+        if VISUAL.FONT_USE_TTF:
+            try:
+                timer_font = pygame.font.Font(VISUAL.FONT_TTF_PATH, font_size)
+            except:
+                timer_font = pygame.font.SysFont(VISUAL.FONT_NAME, font_size)
+        else:
+            timer_font = pygame.font.SysFont(VISUAL.FONT_NAME, font_size)
+
+        # Render the countdown number
+        timer_text = timer_font.render(str(seconds), True, VISUAL.TIMER_TEXT_COLOR)
+        text_rect = timer_text.get_rect(center=(VISUAL.TIMER_CIRCLE_RADIUS, VISUAL.TIMER_CIRCLE_RADIUS))
+
+        # Draw text on circle surface
+        circle_surface.blit(timer_text, text_rect)
+
+        # Position the circle on the main surface (top-left corner by default)
+        circle_pos = (
+            VISUAL.TIMER_POSITION_X - VISUAL.TIMER_CIRCLE_RADIUS,
+            VISUAL.TIMER_POSITION_Y - VISUAL.TIMER_CIRCLE_RADIUS
+        )
+
+        # Blit the circle surface to the main surface
+        surface.blit(circle_surface, circle_pos)
+
+
+
 

@@ -40,7 +40,7 @@ class GameConfig:
 
     # Display Settings
     GAME_WIDTH = 1024                   # Game canvas width
-    GAME_HEIGHT = 768                   # Game canvas height
+    GAME_HEIGHT = 1024                   # Game canvas height
     FULLSCREEN = True                   # Run in fullscreen mode
 
     # Game Mechanics
@@ -60,6 +60,23 @@ class VisualConfig:
     # Text Colors (RGB tuples)
     TEXT_COLOR_1 = (138, 3, 3)          # Primary text color (dark red)
     TEXT_BG_1 = (0, 0, 0)               # Primary text background (black)
+
+    # Text Background Configuration (for candy picker screen)
+    SHOW_PRIZE_TEXT = False              # Show prize text during candy flipping (True/False)
+    SHOW_TEXT_BACKGROUND = False         # Show background behind prize text (True/False)
+    TEXT_BG_OPACITY = 200               # Background opacity (0-255, 0=transparent, 255=opaque)
+    TEXT_BG_HEIGHT_FRACTION = 0.25      # Background height as fraction of screen (0.25 = 1/4 of screen)
+
+    # Countdown Timer Configuration (for candy picker screen)
+    TIMER_ENABLED = True               # Enable countdown timer (True/False)
+    TIMER_START_SECONDS = 10            # Total seconds before auto-triggering button press
+    TIMER_SHOW_AT_SECONDS = 5          # When to show the timer (seconds remaining)
+    TIMER_CIRCLE_RADIUS = 100            # Radius of the circle background in pixels
+    TIMER_POSITION_X = 200              # X position of timer center (pixels from left)
+    TIMER_POSITION_Y = 200              # Y position of timer center (pixels from top)
+    TIMER_TEXT_COLOR = (255, 255, 255)  # Timer text color (white)
+    TIMER_CIRCLE_COLOR = (0, 0, 0)      # Timer circle background color (black)
+    TIMER_CIRCLE_OPACITY = 200          # Timer circle opacity (0-255)
 
     # Font Configuration
     FONT_USE_TTF = True                 # True = use TTF file, False = use system font
