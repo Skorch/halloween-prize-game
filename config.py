@@ -13,9 +13,9 @@ class HardwareConfig:
 
     # GPIO Pin Numbers (BCM numbering)
     LED_PIN = 27            # Standard LED output
-    BUTTON_PIN = 17         # Button input
+    BUTTON_PIN = 4         # Button input
     BUZZER_PIN = 25         # Buzzer/sound output
-    SWITCH_PIN = 13         # Switch input (currently unused)
+    SWITCH_PIN = 18         # Switch input (currently unused)
 
     # Regular LED Configuration (not NeoPixels)
     # Multiple individual LEDs controlled via GPIO
