@@ -27,11 +27,20 @@ class Game():
     def __init__(self) -> None:
         pygame.init()
         display_info = pygame.display.Info()
+
+        # Game canvas size (internal rendering resolution)
         self.GAME_W, self.GAME_H = GAME.GAME_WIDTH, GAME.GAME_HEIGHT
-        # display_info.current_w, display_info.current_h #int(480),int(270)
-        self.GAME_DIMENSIONS = (self.GAME_W,self.GAME_H)
-        self.SCREEN_WIDTH, self.SCREEN_HEIGHT = self.GAME_W, self.GAME_H #int(1920), int(1080)
+        self.GAME_DIMENSIONS = (self.GAME_W, self.GAME_H)
+
+        # Screen size (actual display resolution)
+        # Use actual display resolution for fullscreen, or config values for windowed
+        if GAME.FULLSCREEN:
+            self.SCREEN_WIDTH, self.SCREEN_HEIGHT = display_info.current_w, display_info.current_h
+        else:
+            self.SCREEN_WIDTH, self.SCREEN_HEIGHT = self.GAME_W, self.GAME_H
+
         self.SCREEN_DIMENSIONS = (self.SCREEN_WIDTH, self.SCREEN_HEIGHT)
+        print(f"Display: {display_info.current_w}x{display_info.current_h}, Game canvas: {self.GAME_W}x{self.GAME_H}, Screen: {self.SCREEN_WIDTH}x{self.SCREEN_HEIGHT}")
         self.pi = pi
 
         self.pi.gpio_setup(self.button_press)
@@ -255,10 +264,14 @@ class Game():
         # logger.debug("clear rgb leds")
         self.pi.clear_rgb_leds()
         
-if __name__ == '__main__':
+def main():
+    """Main entry point for the Halloween Prize Game"""
     g = Game()
     print("starting")
     while g.running:
         g.game_loop()
-        
+
     g.quit_game()
+
+if __name__ == '__main__':
+    main()

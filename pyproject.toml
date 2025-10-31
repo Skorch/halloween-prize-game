@@ -8,3 +8,6 @@ dependencies = [
     "pygame",
     "rpi-lgpio",
 ]
+
+[project.scripts]
+halloween-game = "game:main"
