@@ -4,9 +4,10 @@ from time import time
 import pygame
 
 from states.title import Title
+from config import GAME, HW, VISUAL, MESSAGES
 
-dev = False
-if not dev:
+# Dev/Prod mode selection from config
+if not GAME.DEV_MODE:
     import pi2 as pi
     print("prod")
 else:
@@ -19,26 +20,28 @@ BUTTONS_ESCAPE = "escape"
 
 BUTTON_PRESS_EVENT = pygame.USEREVENT + 1
 BUTTON_RELEASE_EVENT = pygame.USEREVENT + 2
-BUTTON_DELAY = 1.3
-RGB_COUNT = 4
+BUTTON_DELAY = HW.BUTTON_DELAY
+RGB_COUNT = GAME.RGB_COUNT
 
 class Game():
     def __init__(self) -> None:
         pygame.init()
         display_info = pygame.display.Info()
-        self.GAME_W, self.GAME_H = 1024,768 
+        self.GAME_W, self.GAME_H = GAME.GAME_WIDTH, GAME.GAME_HEIGHT
         # display_info.current_w, display_info.current_h #int(480),int(270)
         self.GAME_DIMENSIONS = (self.GAME_W,self.GAME_H)
         self.SCREEN_WIDTH, self.SCREEN_HEIGHT = self.GAME_W, self.GAME_H #int(1920), int(1080)
         self.SCREEN_DIMENSIONS = (self.SCREEN_WIDTH, self.SCREEN_HEIGHT)
         self.pi = pi
-        
+
         self.pi.gpio_setup(self.button_press)
         # print("setting canvas")
         self.game_canvas = pygame.Surface(self.GAME_DIMENSIONS)
         # print("setting screen")
-        # self.screen = pygame.display.set_mode(self.SCREEN_DIMENSIONS)
-        self.screen = pygame.display.set_mode(self.SCREEN_DIMENSIONS, pygame.FULLSCREEN)
+        if GAME.FULLSCREEN:
+            self.screen = pygame.display.set_mode(self.SCREEN_DIMENSIONS, pygame.FULLSCREEN)
+        else:
+            self.screen = pygame.display.set_mode(self.SCREEN_DIMENSIONS)
         # print("variables")
 
         self.running, self.playing = True, True
@@ -136,14 +139,23 @@ class Game():
         self.dt = now - self.prev_time
         self.prev_time = now
 
-    def draw_text(self, surface, text, color, x, y, fill_rect = None, fill_position = (0,0), fill_color=(255,255,255), fill_alpha=255):
+    def draw_text(self, surface, text, color, x, y, fill_rect = None, fill_position = (0,0), fill_color=(255,255,255), fill_alpha=255, font=None):
+        """
+        Draw text on the surface with optional background fill.
+
+        Args:
+            font: Optional pygame font. If None, uses default font. Can be one of:
+                  self.font_small, self.font_medium, self.font_large, self.font_xlarge
+        """
         if fill_rect:
             bg = pygame.Surface(fill_rect)
             bg.set_alpha(fill_alpha)
             bg.fill(fill_color)
             surface.blit(bg, fill_position)
 
-        text_surface = self.font.render(text, True, color)
+        # Use provided font or fall back to default
+        active_font = font if font is not None else self.font
+        text_surface = active_font.render(text, True, color)
         text_rect = text_surface.get_rect()
         text_rect.center = (x, y)
         # text_rect.set_alpha(0.6)
@@ -157,7 +169,46 @@ class Game():
     def load_assets(self):
         # print("loading assets")
         self.assets_dir = os.path.join("assets")
-        self.font = pygame.font.SysFont('comicsans', 28)
+
+        # Load multiple font sizes from config
+        # Check if using TTF file or system font
+        if VISUAL.FONT_USE_TTF:
+            # Load custom TTF font file
+            try:
+                self.font_small = pygame.font.Font(VISUAL.FONT_TTF_PATH, VISUAL.FONT_SIZE_SMALL)
+                self.font_medium = pygame.font.Font(VISUAL.FONT_TTF_PATH, VISUAL.FONT_SIZE_MEDIUM)
+                self.font_large = pygame.font.Font(VISUAL.FONT_TTF_PATH, VISUAL.FONT_SIZE_LARGE)
+                self.font_xlarge = pygame.font.Font(VISUAL.FONT_TTF_PATH, VISUAL.FONT_SIZE_XLARGE)
+                logger.info(f"Loaded custom font: {VISUAL.FONT_TTF_PATH}")
+            except Exception as e:
+                logger.error(f"Failed to load TTF font '{VISUAL.FONT_TTF_PATH}': {e}")
+                logger.info(f"Falling back to system font: {VISUAL.FONT_NAME}")
+                # Fall back to system font
+                self.font_small = pygame.font.SysFont(VISUAL.FONT_NAME, VISUAL.FONT_SIZE_SMALL)
+                self.font_medium = pygame.font.SysFont(VISUAL.FONT_NAME, VISUAL.FONT_SIZE_MEDIUM)
+                self.font_large = pygame.font.SysFont(VISUAL.FONT_NAME, VISUAL.FONT_SIZE_LARGE)
+                self.font_xlarge = pygame.font.SysFont(VISUAL.FONT_NAME, VISUAL.FONT_SIZE_XLARGE)
+        else:
+            # Use system font
+            self.font_small = pygame.font.SysFont(VISUAL.FONT_NAME, VISUAL.FONT_SIZE_SMALL)
+            self.font_medium = pygame.font.SysFont(VISUAL.FONT_NAME, VISUAL.FONT_SIZE_MEDIUM)
+            self.font_large = pygame.font.SysFont(VISUAL.FONT_NAME, VISUAL.FONT_SIZE_LARGE)
+            self.font_xlarge = pygame.font.SysFont(VISUAL.FONT_NAME, VISUAL.FONT_SIZE_XLARGE)
+
+        # Default font for backward compatibility
+        self.font = self.font_small
+
+        # Create a mapping of font sizes to font objects for easy lookup
+        self.font_size_map = {
+            VISUAL.FONT_SIZE_SMALL: self.font_small,
+            VISUAL.FONT_SIZE_MEDIUM: self.font_medium,
+            VISUAL.FONT_SIZE_LARGE: self.font_large,
+            VISUAL.FONT_SIZE_XLARGE: self.font_xlarge,
+        }
+
+    def get_font_by_size(self, font_size):
+        """Get a font object by its configured size value"""
+        return self.font_size_map.get(font_size, self.font)
 
 
     def reset_states(self):

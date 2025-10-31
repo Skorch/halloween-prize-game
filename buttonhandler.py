@@ -1,9 +1,14 @@
+# GPIO import - uses rpi-lgpio library for Raspberry Pi 5 compatibility
 import RPi.GPIO as GPIO
 import threading
 import time
+from config import HW
 
 class ButtonHandler():
-    def __init__(self, pin, edge, func, cooldown_time_s = 0.1):
+    def __init__(self, pin, edge, func, cooldown_time_s = None):
+        # Use config default if not specified
+        if cooldown_time_s is None:
+            cooldown_time_s = HW.BUTTON_COOLDOWN
 
         self.pin = pin
         self.edge = edge

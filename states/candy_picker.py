@@ -4,45 +4,77 @@ from picker import get_new_image
 from states.state import State
 from states.winner import Winner
 from colors import *
+from config import MESSAGES, PRIZES
 from asyncio.log import logger
 
-PLAYDOUGH_FOLDER = "assets/playdough/*"
-CANDY_FOLDER = "assets/candy/*"
-FULL_SIZE_FOLDER = "assets/skull/*"
+# =============================================================================
+# PRIZE SETUP - Built from config
+# =============================================================================
 
-default_volume = 0.05
+# Build prize data structures from config
+def build_prize_data():
+    """Build prize structures from PRIZES config"""
+    _titles = {}
+    _sounds = {}
+    _assets = {}
+    _inventory = {}
 
-titles = {
-    "playdough": "Playdough",
-    "full_size": "3d Skull",
-    "mini": "Mini Candy"
-}
+    # Add mini candy
+    _titles["mini"] = PRIZES.PRIZE_CATEGORIES["mini"]["title"]
+    _sounds["mini"] = pygame.mixer.Sound(PRIZES.PRIZE_CATEGORIES["mini"]["sound_file"])
+    _assets["mini"] = glob.glob(PRIZES.PRIZE_CATEGORIES["mini"]["folder"])
+    _inventory["mini"] = PRIZES.MINI_CANDY_INVENTORY
 
-sounds = {
-    "playdough": pygame.mixer.Sound("sounds/small_prize_play.wav"),
-    "full_size": pygame.mixer.Sound("sounds/big_prize_new.wav"),
-    "mini": pygame.mixer.Sound("sounds/small_prize_candy.wav"),
-    "beep": pygame.mixer.Sound("sounds/prize-game-sound-2.wav")
-}
+    # Add playdough (if available)
+    if PRIZES.PLAYDOUGH_INVENTORY > 0:
+        _titles["playdough"] = PRIZES.PRIZE_CATEGORIES["playdough"]["title"]
+        _sounds["playdough"] = pygame.mixer.Sound(PRIZES.PRIZE_CATEGORIES["playdough"]["sound_file"])
+        _assets["playdough"] = glob.glob(PRIZES.PRIZE_CATEGORIES["playdough"]["folder"])
+        _inventory["playdough"] = PRIZES.PLAYDOUGH_INVENTORY
 
-prize_probability = {
-    "playdough": 0.3,
-    "full_size": 0.3,
-    "mini": 0.4
-}
+    # Add big prize (use configured type: skull or full_size)
+    big_prize_key = PRIZES.BIG_PRIZE_TYPE
+    _titles["big_prize"] = PRIZES.PRIZE_CATEGORIES[big_prize_key]["title"]
+    _sounds["big_prize"] = pygame.mixer.Sound(PRIZES.PRIZE_CATEGORIES[big_prize_key]["sound_file"])
+    _assets["big_prize"] = glob.glob(PRIZES.PRIZE_CATEGORIES[big_prize_key]["folder"])
+    _inventory["big_prize"] = PRIZES.BIG_PRIZE_INVENTORY
 
-assets = {
-    "playdough": glob.glob(PLAYDOUGH_FOLDER),
-    "full_size": glob.glob(FULL_SIZE_FOLDER),
-    "mini": glob.glob(CANDY_FOLDER)
-}
+    # Beep sound
+    _sounds["beep"] = pygame.mixer.Sound(PRIZES.BEEP_SOUND_FILE)
+
+    return _titles, _sounds, _assets, _inventory
+
+def calculate_probabilities(inventory):
+    """Calculate probabilities based on remaining inventory"""
+    if not PRIZES.USE_INVENTORY_PROBABILITIES:
+        # Use fixed probabilities
+        return PRIZES.FIXED_PROBABILITIES.copy()
+
+    # Calculate inventory-based probabilities
+    total = sum(inventory.values())
+    if total == 0:
+        # Fallback if somehow all inventory is zero
+        logger.warning("All prize inventory is zero! Using equal probabilities")
+        return {key: 1.0 / len(inventory) for key in inventory.keys()}
+
+    # Probability proportional to inventory
+    probabilities = {key: count / total for key, count in inventory.items()}
+    logger.debug(f"Calculated probabilities from inventory: {probabilities}")
+    return probabilities
+
+# Initialize prize data
+titles, sounds, assets, inventory = build_prize_data()
+prize_probability = calculate_probabilities(inventory)
+
+# Set sound volumes
+for sound_key in sounds:
+    sounds[sound_key].set_volume(PRIZES.DEFAULT_SOUND_VOLUME)
 
 cached_assets = {}
 
-
-
+# Game timing and LED settings
 STEP_RATE_CURVE = [0.75, 0.75, 0.75, 0.5, 0.5, 0.5, 0.5, 0.25, 0.25, 0.25, 0.25, 0.2, 0.2, 0.2, 0.15, 0.15, 0.15, 0.15, 0.1]
-MIN_FULL_SIZE_TICK = 5
+MIN_FULL_SIZE_TICK = PRIZES.MIN_SPINS_FOR_BIG_PRIZE
 GREEN = (0, 255, 0)
 OFF = (0, 0, 0)
 RGB_COLOR_SEQUENCE = [[GREEN, OFF, OFF, OFF], [OFF, GREEN, OFF, OFF], [OFF, OFF, GREEN, OFF], [OFF, OFF, OFF, GREEN]]
@@ -59,8 +91,7 @@ class CandyPicker(State):
         self.get_new_image()
         self.last_image_update = time()
 
-        for sound_key in sounds:
-            sounds[sound_key].set_volume(default_volume)
+        # Sound volumes are already set at module level
         
         
         
@@ -139,7 +170,11 @@ class CandyPicker(State):
             text_color = TEXT_COLOR_1
             fill_color = TEXT_BG_1
             fill_alpha = 200
-            self.game.draw_text(surface, prize_text, text_color, self.game.GAME_W/2, self.game.GAME_H*7/8, fill_rect=fill_rect, fill_position=fill_position, fill_color=fill_color, fill_alpha=fill_alpha)
+            # Use configurable font size from MESSAGES config
+            font = self.game.get_font_by_size(MESSAGES.PICKER_MESSAGE_FONT_SIZE)
+            self.game.draw_text(surface, prize_text, text_color, self.game.GAME_W/2, self.game.GAME_H*7/8,
+                              fill_rect=fill_rect, fill_position=fill_position, fill_color=fill_color, fill_alpha=fill_alpha,
+                              font=font)
 
 
 
@@ -163,17 +198,25 @@ class CandyPicker(State):
 
     
     def pick_prize(self):
+        """Pick a prize based on configured probabilities and inventory"""
 
-        prize_types = list(filter(lambda prize: prize != 'full_size' or self.current_tick >= MIN_FULL_SIZE_TICK, prize_probability.keys()))
-        weights = map(lambda prize: prize_probability[prize],prize_types )
+        # Filter out big_prize if minimum spins not reached
+        prize_types = list(filter(
+            lambda prize: prize != 'big_prize' or self.current_tick >= MIN_FULL_SIZE_TICK,
+            prize_probability.keys()
+        ))
 
+        # Get weights for filtered prize types
+        weights = [prize_probability[prize] for prize in prize_types]
+
+        # Pick a prize type
         pick = random.choices(prize_types, weights=weights)[0]
-        print(f"pick: {pick}")
+        logger.info(f"Prize picked: {pick} (tick {self.current_tick})")
 
+        # Select a random image file for this prize type
         prev_filename = self.current_prize["filename"] if self.current_prize else ''
         next_filename = None
         while not next_filename:
-
             file_choice = random.choice(assets[pick])
             if file_choice and file_choice != prev_filename:
                 next_filename = file_choice

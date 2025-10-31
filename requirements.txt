@@ -1,1 +1,4 @@
 pygame
+# RPi.GPIO
+rpi-lgpio
+neopixel

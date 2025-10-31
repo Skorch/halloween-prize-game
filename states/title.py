@@ -1,6 +1,7 @@
 from states.state import State
 from states.candy_picker import CandyPicker
 from colors import *
+from config import MESSAGES
 import pygame
 from time import time
 
@@ -36,7 +37,9 @@ class Title(State):
         fill_color = TEXT_BG_1
         # fill_color = (255, 255, 255)
         alpha = 255
-        self.game.draw_text( surface, "Press the BIG BUTTON to start!", text_color, self.game.GAME_W/2, self.game.GAME_H/2, self.game.GAME_DIMENSIONS, fill_color=fill_color, fill_alpha=alpha )
+        font = self.game.get_font_by_size(MESSAGES.TITLE_MESSAGE_FONT_SIZE)
+        self.game.draw_text(surface, MESSAGES.TITLE_MESSAGE, text_color, self.game.GAME_W/2, self.game.GAME_H/2,
+                          self.game.GAME_DIMENSIONS, fill_color=fill_color, fill_alpha=alpha, font=font)
         
             
     def render(self, surface):
@@ -51,8 +54,8 @@ class Title(State):
         fill_color = TEXT_BG_1  # This color will be behind your text
         alpha = 0  # Making it semi-transparent for contrast
 
-        text_msg = "Press the BIG BUTTON to start!"
-
-        # Assuming your draw_text method creates a filled rectangle behind the text if fill_color and fill_alpha are provided
-        self.game.draw_text(surface, text_msg, text_color, self.game.GAME_W/2, self.game.GAME_H/1.05, self.game.GAME_DIMENSIONS, fill_color=fill_color, fill_alpha=alpha)
+        # Use configurable message and font size from MESSAGES config
+        font = self.game.get_font_by_size(MESSAGES.TITLE_MESSAGE_FONT_SIZE)
+        self.game.draw_text(surface, MESSAGES.TITLE_MESSAGE, text_color, self.game.GAME_W/2, self.game.GAME_H/1.05,
+                          self.game.GAME_DIMENSIONS, fill_color=fill_color, fill_alpha=alpha, font=font)
         

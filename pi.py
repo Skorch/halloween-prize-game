@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-import RPi.GPIO as GPIO 
+# GPIO import - uses rpi-lgpio library for Raspberry Pi 5 compatibility
+import RPi.GPIO as GPIO
 import time
 import pi_sound
 

@@ -1,34 +1,34 @@
 #!/usr/bin/env python3
-import RPi.GPIO as GPIO 
+# GPIO import - uses rpi-lgpio library for Raspberry Pi 5 compatibility
+import RPi.GPIO as GPIO
 import time
 import pi_sound
-import neopixel
-
 
 import logging
 from buttonhandler import ButtonHandler
+from config import HW
+
 logger = logging.getLogger()
 
+# Import hardware configuration from centralized config
+LED_PIN = HW.LED_PIN
+BUTTON_PIN = HW.BUTTON_PIN
+BUZZER_PIN = HW.BUZZER_PIN
+SWITCH_PIN = HW.SWITCH_PIN
+FLASH_FREQ = HW.FLASH_FREQ
+LED_ON = HW.LED_ON
 
-LED_PIN = 27
-BUTTON_PIN = 17
-BUZZER_PIN = 25
-SWITCH_PIN = 13
-FLASH_FREQ = 0.1
-LED_ON = True
-
-RGB_LED_PIN = 22
-NUM_RGB_LEDS = 4
+# Regular LED configuration (not NeoPixels)
+RGB_LED_PINS = HW.RGB_LED_PINS
+NUM_RGB_LEDS = HW.NUM_RGB_LEDS
 
 button_event = None
-pixels = None
 
 def gpio_setup(button_press):
 
     logging.info("***Setting up GPIO")
 
-    global button_event, switch_on, pixels
-
+    global button_event, switch_on
 
     # Set the GPIO modes to BCM Numbering
     GPIO.setmode(GPIO.BCM)
@@ -36,8 +36,10 @@ def gpio_setup(button_press):
     GPIO.setup(LED_PIN, GPIO.OUT, initial=GPIO.HIGH)
     GPIO.setup(BUTTON_PIN, GPIO.IN)
 
-    # Initialize RGB LEDs
-    pixels = neopixel.NeoPixel(RGB_LED_PIN, NUM_RGB_LEDS, brightness=0.2, auto_write=False)
+    # Initialize RGB LED pins as outputs (regular LEDs, not NeoPixels)
+    for pin in RGB_LED_PINS:
+        GPIO.setup(pin, GPIO.OUT, initial=GPIO.LOW)
+        logging.info(f"Set up RGB LED on GPIO pin {pin}")
 
     GPIO.add_event_detect(BUTTON_PIN, GPIO.BOTH, callback=button_press)
 
@@ -73,15 +75,22 @@ def toggle_led():
     return LED_ON
 
 def set_rgb_leds(colors):
-    global pixels
+    """
+    Set individual LED states based on color tuples.
+    For regular LEDs: any non-zero color turns LED on, (0,0,0) turns it off
+    """
     for i in range(min(NUM_RGB_LEDS, len(colors))):
-        pixels[i] = colors[i]
-    pixels.show()
+        # Check if color is non-zero (any value other than (0,0,0) means ON)
+        if isinstance(colors[i], tuple) and len(colors[i]) == 3:
+            is_on = any(colors[i])  # True if any RGB value is non-zero
+            GPIO.output(RGB_LED_PINS[i], GPIO.HIGH if is_on else GPIO.LOW)
+            logger.debug(f"LED {i} on pin {RGB_LED_PINS[i]}: {'ON' if is_on else 'OFF'} (color={colors[i]})")
 
 def clear_rgb_leds():
-    global pixels
-    pixels.fill((0, 0, 0))
-    pixels.show()
+    """Turn off all RGB LEDs"""
+    for pin in RGB_LED_PINS:
+        GPIO.output(pin, GPIO.LOW)
+    logger.debug("All RGB LEDs cleared")
     
 def play_winner():
     pi_sound.play_sounds(pi_sound.winning_sound)
@@ -131,13 +140,26 @@ def press():
     #     led_off()
         
 def test_rgb_leds():
-    colors = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0)]  # Red, Green, Blue, Yellow
-    for _ in range(10):  # Loop 10 times
-        for color in colors:
-            set_rgb_leds([color] * NUM_RGB_LEDS)
-            time.sleep(0.5)
-        clear_rgb_leds()
+    """Test individual LEDs by turning them on/off in sequence"""
+    print(f"Testing {NUM_RGB_LEDS} LEDs on pins: {RGB_LED_PINS}")
+
+    # Test each LED individually
+    for i in range(NUM_RGB_LEDS):
+        colors = [(0, 0, 0)] * NUM_RGB_LEDS
+        colors[i] = (255, 255, 255)  # Turn on LED i
+        print(f"Turning on LED {i} (GPIO pin {RGB_LED_PINS[i]})")
+        set_rgb_leds(colors)
         time.sleep(0.5)
+
+    # Turn all on
+    print("All LEDs ON")
+    set_rgb_leds([(255, 255, 255)] * NUM_RGB_LEDS)
+    time.sleep(1)
+
+    # Turn all off
+    print("All LEDs OFF")
+    clear_rgb_leds()
+    time.sleep(0.5)
 
 if __name__ == "__main__":
     print("testing gpio")

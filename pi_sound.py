@@ -1,4 +1,5 @@
-import RPi.GPIO as GPIO 
+# GPIO import - uses rpi-lgpio library for Raspberry Pi 5 compatibility
+import RPi.GPIO as GPIO
 import time
 
 # from pi2 import BUZZER_PIN
