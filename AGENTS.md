@@ -18,25 +18,25 @@ The task starts once each note and skill it touches is in your context.
 
 | Path | Holds |
 |---|---|
-| `game.py` | The `Game` class: the loop, input, drawing helpers, and the switch between real and fake hardware |
+| `game.py` | The `Game` class: the loop, input, drawing helpers. It takes its hardware, clock, random source and sound as parameters; `main()` picks the real ones |
 | `states/` | One class per screen: `title.py` → `candy_picker.py` (spinning) → `winner.py` → back to title |
 | `config.py` | Every setting a person tunes: pins, prize stock, odds, text, timer, sounds |
+| `prizes.py` | The prizes for one game: titles, sounds, cards, stock, odds, and the pick |
+| `audio.py` | `PygameAudio`, which loads and plays sounds through `pygame.mixer` |
 | `pi2.py`, `buttonhandler.py`, `pi_sound.py` | Real GPIO on the Pi (button, LEDs) through `RPi.GPIO` from `rpi-lgpio` |
 | `pi_dev2.py` | Fake GPIO: logs LED changes; the spacebar stands in for the button |
-| `picker.py`, `pi.py`, `pi_dev.py` | The first version of the game. `states/candy_picker.py:3` still imports `picker.py`, which opens a fullscreen window as it loads |
+| `picker.py`, `pi.py`, `pi_dev.py` | The first version of the game; only each other import them, and nothing the game runs imports any of them |
+| `tests/` | The scripted test suite and its fakes ([docs/testing.md](docs/testing.md)) |
 | `assets/`, `sounds/` | Prize card images, backgrounds, the font, and sound effects |
 | `docs/` | Facts the code does not say: the Pi, decisions. Start at [docs/README.md](docs/README.md) |
 
 ## Running it
 
-**On a Mac**, from the repo folder, with dev mode switched on in memory only:
+**On a Mac**, from the repo folder: `HALLOWEEN_DEV=1 uv run python game.py`. Dev mode uses `pi_dev2.py` in a
+window: spacebar is the button, Esc quits. Add `SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy` in front to run
+with no window and no sound.
 
-```bash
-uv run --no-project --python 3.13 --with pygame==2.6.1 python -c "import config; config.GAME.DEV_MODE = True; config.GAME.FULLSCREEN = False; import game; game.main()"
-```
-
-Spacebar is the button; Esc quits. `--no-project` skips `pyproject.toml`, whose `rpi-lgpio` installs only on
-the Pi. Add `SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy` in front to run with no window and no sound.
+**Tests**: `uv run pytest`. Read [docs/testing.md](docs/testing.md) before adding or changing one.
 
 **On the Pi**, `launch.sh` runs `/usr/bin/python3 game.py`: the system Python and Debian's `python3-pygame`,
 not `uv` or `pyproject.toml`. Reaching the Pi and deploying to it: [docs/raspberry-pi.md](docs/raspberry-pi.md).
@@ -44,14 +44,15 @@ not `uv` or `pyproject.toml`. Reaching the Pi and deploying to it: [docs/raspber
 ## Rules
 
 - **`config.py` keeps `DEV_MODE = False` and `FULLSCREEN = True` in every commit.** The Pi reads them as
-  committed; dev mode there ignores the real button. Switch them in memory, as the Mac command above does.
+  committed; dev mode there ignores the real button. Use `HALLOWEEN_DEV=1` instead.
 - **pygame is 2.6.1, not pygame-ce** (Drew, 2026-10-26). The `pygame-core` skill recommends pygame-ce; follow
   its game-loop advice and keep the library this project runs.
 - **Drew approves every commit and push.**
 - **Size work by complexity and scope**, never by time.
 - **Straightforward, not clever**: plain Python a hobbyist can read on the Pi.
-- **A fake is passed in as a parameter**, never swapped in by replacing a module. This is the direction for
-  hardware, clock, prize pick and sound as tests arrive ([docs/decisions.md](docs/decisions.md)).
+- **A fake is passed in as a parameter**, never swapped in by replacing a module: `Game(hardware, clock, rng,
+  audio)`. Screens read the time from `self.game.now()` and pick through `self.game.prizes`.
+- **`uv run pytest` passes before every commit.**
 - **The Pi's password never goes in the repo.** Agents reach the Pi by SSH key.
 - **Docs change in the same commit as the code they describe.** `plan/`, when it exists, holds only what is
   not built yet; a plan's items move into `docs/` or this file as they are built, and the plan is deleted.

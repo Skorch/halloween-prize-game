@@ -14,3 +14,11 @@ changes an earlier one says so.
 3. **Keep SSH password login on the Pi**, beside key login from Drew's Mac.
 4. **Work in any agent tool.** `AGENTS.md` is the source and `CLAUDE.md` a symlink to it; project skills live
    in `.agents/skills/`, symlinked into `.claude/skills/`.
+5. **Dev mode is switched on by `HALLOWEEN_DEV=1`**, never by editing `config.py`.
+6. **The suite saves screens for review and does not compare them** against approved images: those would
+   change with every art or font change, and SDL draws text slightly differently on the Mac and the Pi.
+7. **The real button's edges are to be measured on the Pi** so the fake button presses the way the real one
+   does. Until then the fake makes one clean edge per press.
+8. **Fakes live in `tests/fakes.py`**, so the game's own code holds only what the game runs.
+9. **Stock that never goes down is a known bug**, recorded as a test that is expected to fail
+   (`test_stock_goes_down_when_a_prize_is_won`); the fix is a change of its own.
