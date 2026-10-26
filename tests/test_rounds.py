@@ -150,3 +150,5 @@ def test_stock_goes_down_when_a_prize_is_won(make_game, clock):
     assert game.state_stack[-1].prize["type"] == "big_prize"
 
     assert game.prizes.inventory["big_prize"] == PRIZES.BIG_PRIZE_INVENTORY - 1
+    total = sum(game.prizes.inventory.values())
+    assert game.prizes.probability["big_prize"] == game.prizes.inventory["big_prize"] / total

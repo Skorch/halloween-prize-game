@@ -43,11 +43,12 @@ class Game():
         self.GAME_DIMENSIONS = (self.GAME_W, self.GAME_H)
 
         # Screen size (actual display resolution)
-        # Use actual display resolution for fullscreen, or config values for windowed
+        # Fullscreen asks for GAME.FULLSCREEN_MODE and takes the size the display gives back
         if self.fullscreen:
-            self.SCREEN_WIDTH, self.SCREEN_HEIGHT = display_info.current_w, display_info.current_h
+            self.screen = pygame.display.set_mode(GAME.FULLSCREEN_MODE, pygame.FULLSCREEN)
         else:
-            self.SCREEN_WIDTH, self.SCREEN_HEIGHT = self.GAME_W, self.GAME_H
+            self.screen = pygame.display.set_mode(self.GAME_DIMENSIONS)
+        self.SCREEN_WIDTH, self.SCREEN_HEIGHT = self.screen.get_size()
 
         self.SCREEN_DIMENSIONS = (self.SCREEN_WIDTH, self.SCREEN_HEIGHT)
         print(f"Display: {display_info.current_w}x{display_info.current_h}, Game canvas: {self.GAME_W}x{self.GAME_H}, Screen: {self.SCREEN_WIDTH}x{self.SCREEN_HEIGHT}")
@@ -56,11 +57,6 @@ class Game():
         self.hardware.gpio_setup(self.button_press)
         # print("setting canvas")
         self.game_canvas = pygame.Surface(self.GAME_DIMENSIONS)
-        # print("setting screen")
-        if self.fullscreen:
-            self.screen = pygame.display.set_mode(self.SCREEN_DIMENSIONS, pygame.FULLSCREEN)
-        else:
-            self.screen = pygame.display.set_mode(self.SCREEN_DIMENSIONS)
         # print("variables")
 
         self.running, self.playing = True, True

@@ -23,7 +23,8 @@ To find it when the name does not answer: `dns-sd -B _workstation._tcp local.` l
 | Python | 3.13.5, `/usr/bin/python3` |
 | pygame | 2.6.1 from the Debian package `python3-pygame` (SDL 2.32.4) |
 | Repo folder | `/home/pi/Documents/halloween-prize-game` |
-| Started by | `launch.sh`. What starts `launch.sh` at boot is not known: no systemd service names the game and `pi`'s crontab is empty |
+| Started by | `launch.sh`, from the desktop session: the game's output goes to `~/.xsession-errors`. What starts `launch.sh` at boot is not known: no systemd service names the game and `pi`'s crontab is empty |
+| Display | HDMI, "TXD Display"; it prefers 1280x800. The game asks for 1000x666 fullscreen (`config.GAME.FULLSCREEN_MODE`) and gets 1024x768, as `~/.xsession-errors` shows: `Display: 1024x768, Game canvas: 1024x1024, Screen: 1024x768` |
 
 `/home/pi/Documents/halloween-prize-game-backup-20251030-181252` is an old copy whose git history is
 damaged (`fatal: bad object HEAD`). Nothing in it is newer than the repo folder.

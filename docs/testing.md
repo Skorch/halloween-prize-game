@@ -45,5 +45,9 @@ def test_press_starts_a_spin(make_game, hardware, audio, snap):
 
 ## What the suite does not cover
 
-The real pins (`pi2.py`, `buttonhandler.py`), the buzzer, real sound, and how the real button bounces. After a
-change to any of them, deploy to the Pi and press the real button ([raspberry-pi.md](raspberry-pi.md)).
+- **The real pins** (`pi2.py`), real sound (`audio.py`'s `PygameAudio`), `game.main()`, and how the real button
+  bounces.
+- **The fullscreen size**: the dummy driver has one mode, so only the Pi shows which mode the display picks.
+
+After a change to any of them, deploy to the Pi and play a round ([raspberry-pi.md](raspberry-pi.md)).
+`buttonhandler.py`, the buzzer in `pi_sound.py` and `Game.beep_on`/`beep_off` are not used by the game at all.

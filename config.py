@@ -42,6 +42,7 @@ class GameConfig:
     GAME_WIDTH = 1024                   # Game canvas width
     GAME_HEIGHT = 1024                   # Game canvas height
     FULLSCREEN = True                   # Run in fullscreen mode
+    FULLSCREEN_MODE = (1000, 666)       # Fullscreen size asked of the display; it picks the nearest mode (1024x768 on the Pi)
 
     # Game Mechanics
     RGB_COUNT = 4                       # Number of RGB LEDs used in game
