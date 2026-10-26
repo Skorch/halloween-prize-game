@@ -2,7 +2,7 @@ from states.state import State
 import pygame
 from time import time
 from colors import *
-from config import MESSAGES
+from config import MESSAGES, VISUAL
 
 RESET_DELAY = 5
 
@@ -56,18 +56,23 @@ class Winner(State):
             surface.blit(image, (0, 0))
 
 
-            text_color = TEXT_COLOR_1
-            fill_color = TEXT_BG_1
-            fill_alpha = 200
-            # Use configurable message with prize name
-            message = MESSAGES.WINNER_MESSAGE.format(prize=self.prize['title'])
+            # Only show winner text if enabled in config
+            if VISUAL.SHOW_WINNER_TEXT:
+                text_color = TEXT_COLOR_1
+                fill_color = TEXT_BG_1
+                fill_alpha = VISUAL.WINNER_BG_OPACITY
+                # Use configurable message with prize name
+                message = MESSAGES.WINNER_MESSAGE.format(prize=self.prize['title'])
+                fill_rect = (self.game.GAME_W, self.game.GAME_H)
+                fill_position = (0, 0)
+                # Use configurable font size from MESSAGES config
+                font = self.game.get_font_by_size(MESSAGES.WINNER_MESSAGE_FONT_SIZE)
+                # Calculate Y position based on configured fraction
+                text_y = self.game.GAME_H * VISUAL.WINNER_TEXT_Y_FRACTION
+                self.game.draw_text(surface, message, text_color, self.game.GAME_W/2, text_y,
+                                  fill_rect=self.game.GAME_DIMENSIONS, fill_color=fill_color, fill_alpha=fill_alpha,
+                                  font=font)
+
             sound = self.prize["sound"]
-            fill_rect = (self.game.GAME_W, self.game.GAME_H)
-            fill_position = (0, 0)
-            # Use configurable font size from MESSAGES config
-            font = self.game.get_font_by_size(MESSAGES.WINNER_MESSAGE_FONT_SIZE)
-            self.game.draw_text(surface, message, text_color, self.game.GAME_W/2, self.game.GAME_H/2,
-                              fill_rect=self.game.GAME_DIMENSIONS, fill_color=fill_color, fill_alpha=fill_alpha,
-                              font=font)
             self.game.play_sound(sound)
             self.has_rendered = True

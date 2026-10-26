@@ -67,6 +67,11 @@ class VisualConfig:
     TEXT_BG_OPACITY = 200               # Background opacity (0-255, 0=transparent, 255=opaque)
     TEXT_BG_HEIGHT_FRACTION = 0.25      # Background height as fraction of screen (0.25 = 1/4 of screen)
 
+    # Winner Screen Configuration
+    SHOW_WINNER_TEXT = False             # Show winner text on result screen (True/False)
+    WINNER_BG_OPACITY = 100             # Winner screen background opacity (0-255, 0=transparent, 255=opaque)
+    WINNER_TEXT_Y_FRACTION = 0.75        # Winner text Y position as fraction of screen height (0.5 = center)
+
     # Countdown Timer Configuration (for candy picker screen)
     TIMER_ENABLED = True               # Enable countdown timer (True/False)
     TIMER_START_SECONDS = 10            # Total seconds before auto-triggering button press
@@ -121,9 +126,9 @@ class PrizesConfig:
     # =============================================================================
     # PRIZE INVENTORY - Set how many of each prize you have this year
     # =============================================================================
-    MINI_CANDY_INVENTORY = 100          # How many mini candies you have
-    PLAYDOUGH_INVENTORY = 20            # How many playdough prizes (set to 0 if none)
-    BIG_PRIZE_INVENTORY = 50            # How many big prizes you have
+    MINI_CANDY_INVENTORY = 80          # How many mini candies you have
+    PLAYDOUGH_INVENTORY = 50            # How many playdough prizes (set to 0 if none)
+    BIG_PRIZE_INVENTORY = 20            # How many big prizes you have
 
     # =============================================================================
     # BIG PRIZE TYPE - What is your "big prize" this year?
@@ -179,7 +184,7 @@ class PrizesConfig:
     # OTHER PRIZE SETTINGS
     # =============================================================================
     BEEP_SOUND_FILE = "sounds/prize-game-sound-2.wav"
-    DEFAULT_SOUND_VOLUME = 0.25
+    DEFAULT_SOUND_VOLUME = 0.50
 
 
 # =============================================================================
