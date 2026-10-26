@@ -8,7 +8,7 @@ import pygame
 from audio import PygameAudio
 from prizes import Prizes
 from states.title import Title
-from video import load_video
+from video import IdleVideo, load_clip
 from config import GAME, HW, VISUAL, MESSAGES
 
 BUTTONS_SPACE = "space"
@@ -22,7 +22,7 @@ RGB_COUNT = GAME.RGB_COUNT
 
 class Game():
     def __init__(self, hardware, clock=time, rng=None, audio=None, fullscreen=GAME.FULLSCREEN,
-                 idle_video_file=VISUAL.IDLE_VIDEO_FILE) -> None:
+                 idle_video_files=VISUAL.IDLE_VIDEO_FILES) -> None:
         """
         Args:
             hardware: the button and LEDs: the pi2 module on the Pi, pi_dev2 on a Mac, a fake in tests
@@ -30,9 +30,9 @@ class Game():
             rng: random source for prize picks; a new random.Random() if None
             audio: loads and plays sounds; PygameAudio() if None
             fullscreen: fill the display, or open a window of the game's size
-            idle_video_file: the video the title screen loops; None shows the still background instead
+            idle_video_files: the clips the title screen plays in order; None shows the still background instead
         """
-        self.idle_video_file = idle_video_file
+        self.idle_video_files = idle_video_files
         self.clock = clock
         self.rng = rng if rng is not None else random.Random()
         self.fullscreen = fullscreen
@@ -111,9 +111,10 @@ class Game():
     
     def game_loop(self):
         # print("starting loop")
+        frame_limiter = pygame.time.Clock()
         while self.playing:
             self.step()
-            # print("loop")
+            frame_limiter.tick(GAME.MAX_FPS)   # sleeps out the rest of the frame, so the Pi is not drawing flat out
 
     def step(self):
         """One frame: time, events, update, draw."""
@@ -223,15 +224,19 @@ class Game():
         # Title screen background, loaded once here because the title screen is made again after every round
         title_background = pygame.image.load(VISUAL.TITLE_BACKGROUND_FILE)
         self.title_background = pygame.transform.smoothscale(title_background, self.GAME_DIMENSIONS).convert()
-        self.idle_video = None
-        if self.idle_video_file is not None:
+        # Idle clips: a clip that fails to load is skipped; with none, the title shows the still background
+        clips = []
+        for path in self.idle_video_files or []:
             try:
-                self.idle_video = load_video(self.idle_video_file, self.GAME_DIMENSIONS,
-                                             VISUAL.IDLE_VIDEO_LOOP_DELAY)
-                logger.info(f"Loaded idle video: {self.idle_video_file}, {len(self.idle_video.frames)} frames")
+                clips.append(load_clip(path, self.GAME_DIMENSIONS))
+                logger.info(f"Loaded idle clip: {path}, {len(clips[-1].frames)} frames")
             except Exception as e:
-                logger.error(f"Failed to load idle video '{self.idle_video_file}': {e}")
-                logger.info(f"Falling back to the still background: {VISUAL.TITLE_BACKGROUND_FILE}")
+                logger.error(f"Failed to load idle clip '{path}', skipping it: {e}")
+        self.idle_video = None
+        if clips:
+            self.idle_video = IdleVideo(clips, VISUAL.IDLE_VIDEO_HOLD_BEFORE, VISUAL.IDLE_VIDEO_HOLD_AFTER)
+        elif self.idle_video_files:
+            logger.info(f"No idle clip loaded; falling back to the still background: {VISUAL.TITLE_BACKGROUND_FILE}")
 
         # Default font for backward compatibility
         self.font = self.font_small

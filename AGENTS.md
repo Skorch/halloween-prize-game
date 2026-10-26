@@ -23,7 +23,7 @@ The task starts once each note and skill it touches is in your context.
 | `config.py` | Every setting a person tunes: pins, prize stock, odds, text, timer, sounds, the title video |
 | `prizes.py` | The prizes for one game: titles, sounds, cards, stock, odds, and the pick |
 | `audio.py` | `PygameAudio`, which loads and plays sounds through `pygame.mixer` |
-| `video.py` | `load_video`, which decodes the title screen's video once through PyAV (`av`) into a list of frames |
+| `video.py` | `load_clip`, which decodes one of the title screen's clips once through PyAV (`av`) into a list of frames, and `IdleVideo`, which picks the frame to show from the time |
 | `pi2.py`, `buttonhandler.py`, `pi_sound.py` | Real GPIO on the Pi (button, LEDs) through `RPi.GPIO` from `rpi-lgpio` |
 | `pi_dev2.py` | Fake GPIO: logs LED changes; the spacebar stands in for the button |
 | `picker.py`, `pi.py`, `pi_dev.py` | The first version of the game; only each other import them, and nothing the game runs imports any of them |

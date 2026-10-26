@@ -43,6 +43,7 @@ class GameConfig:
     GAME_HEIGHT = 1024                   # Game canvas height
     FULLSCREEN = True                   # Run in fullscreen mode
     FULLSCREEN_MODE = (1000, 666)       # Fullscreen size asked of the display; it picks the nearest mode (1024x768 on the Pi)
+    MAX_FPS = 30                        # Frames drawn per second at most; the idle clips play at 30
 
     # Game Mechanics
     RGB_COUNT = 4                       # Number of RGB LEDs used in game
@@ -63,8 +64,15 @@ class VisualConfig:
     TEXT_BG_1 = (0, 0, 0)               # Primary text background (black)
 
     # Title Screen Background
-    IDLE_VIDEO_FILE = "assets/backgrounds/skeleton.mp4"  # Loops on the title screen, with no text; None = use the image below
-    IDLE_VIDEO_LOOP_DELAY = 5           # Seconds the last frame stays up before the video plays again
+    IDLE_VIDEO_FILES = [                # Clips the title screen plays in this order, with no text; None = use the image below
+        "assets/idle/automaton-1.mp4",  # curtains open
+        "assets/idle/automaton-2.mp4",
+        "assets/idle/automaton-3.mp4",
+        "assets/idle/automaton-4.mp4",
+        "assets/idle/automaton-5.mp4",  # curtains close
+    ]
+    IDLE_VIDEO_HOLD_BEFORE = 5          # Seconds the first frame stays up before the clips play
+    IDLE_VIDEO_HOLD_AFTER = 5           # Seconds the last frame stays up after them, before it all starts over
     TITLE_BACKGROUND_FILE = "assets/backgrounds/background2.png"  # Shown with the title message when there is no video, or it fails to load
 
     # Text Background Configuration (for candy picker screen)

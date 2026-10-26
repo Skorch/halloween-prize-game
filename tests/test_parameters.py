@@ -45,7 +45,7 @@ def test_fullscreen_scales_to_the_size_the_display_gives():
     import pygame
 
     g = game.Game(hardware=FakeHardware(), clock=FakeClock(), rng=random.Random(1), audio=FakeAudio(),
-                  fullscreen=True)
+                  fullscreen=True, idle_video_files=None)
 
     assert g.screen.get_flags() & pygame.FULLSCREEN
     assert g.SCREEN_DIMENSIONS == g.screen.get_size()

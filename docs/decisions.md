@@ -34,3 +34,13 @@ changes an earlier one says so.
     600 MB of its 4 GB.
 14. **Loading is made efficient where needed**: the title's video and still background load once in
     `Game`, not on every frame or every round. Anything else changes only if measuring on the Pi shows it is needed.
+15. **Five clips replace the skeleton video** (changes decisions 11 and 13). They play in the order
+    `assets/idle/automaton-1.mp4` to `automaton-5.mp4`; each clip ends on the frame the next begins with, and
+    the last ends on the first's opening frame, curtains closed. The first frame holds for
+    `IDLE_VIDEO_HOLD_BEFORE` (5 s) before the clips play, and the last for `IDLE_VIDEO_HOLD_AFTER` (5 s) after.
+    A clip that fails to load is skipped; with none, the title shows `background2.png`.
+16. **All the clips' frames still load at startup**: 12 s of clips fits in the Pi's memory, and decoding
+    while playing could pause at the joins between clips. Decoding while playing is worth it if the clips grow
+    past about 15 to 20 s in total.
+17. **The game loop draws at most `GAME.MAX_FPS` (30) frames a second**; before, it drew as fast as it could
+    and kept one processor core busy.

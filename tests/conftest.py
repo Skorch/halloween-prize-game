@@ -43,14 +43,14 @@ def audio():
 def make_game(clock, hardware, audio):
     """Builds a Game on the fakes. rng defaults to a seeded random source, so every run picks the same.
 
-    The title shows the still background unless a test passes idle_video_file: loading the video takes
-    about a second, which most tests do not need.
+    The title shows the still background unless a test passes idle_video_files: decoding the clips takes
+    seconds, which most tests do not need.
     """
     import game
 
-    def make(rng=None, hardware=hardware, idle_video_file=None):
+    def make(rng=None, hardware=hardware, idle_video_files=None):
         return game.Game(hardware=hardware, clock=clock, rng=rng if rng is not None else random.Random(1),
-                         audio=audio, fullscreen=False, idle_video_file=idle_video_file)
+                         audio=audio, fullscreen=False, idle_video_files=idle_video_files)
 
     yield make
     pygame.quit()

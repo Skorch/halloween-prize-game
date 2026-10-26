@@ -1,23 +1,42 @@
 import pygame
 
 
-class IdleVideo:
-    """Every frame of a video, decoded once and scaled to the game canvas, so the title screen can loop it."""
+class Clip:
+    """Every frame of one video, decoded once and scaled to the game canvas."""
 
-    def __init__(self, frames, fps, loop_delay):
+    def __init__(self, frames, fps):
         self.frames = frames
         self.fps = fps
-        self.loop_delay = loop_delay
         self.duration = len(frames) / fps
 
     def frame_at(self, seconds):
-        """The frame to show `seconds` after the video started: it plays, holds its last frame for
-        loop_delay seconds, then plays again from the first."""
-        seconds_into_loop = seconds % (self.duration + self.loop_delay)
-        return self.frames[min(int(seconds_into_loop * self.fps), len(self.frames) - 1)]
+        return self.frames[min(int(seconds * self.fps), len(self.frames) - 1)]
 
 
-def load_video(path, size, loop_delay):
+class IdleVideo:
+    """The title screen's clips in order: it holds the first frame for hold_before seconds, plays each clip,
+    holds the last frame for hold_after seconds, then starts over."""
+
+    def __init__(self, clips, hold_before, hold_after):
+        self.clips = clips
+        self.hold_before = hold_before
+        self.hold_after = hold_after
+        self.duration = hold_before + sum(clip.duration for clip in clips) + hold_after
+
+    def frame_at(self, seconds):
+        """The frame to show `seconds` after the title screen started."""
+        seconds = seconds % self.duration
+        if seconds < self.hold_before:
+            return self.clips[0].frames[0]
+        seconds -= self.hold_before
+        for clip in self.clips:
+            if seconds < clip.duration:
+                return clip.frame_at(seconds)
+            seconds -= clip.duration
+        return self.clips[-1].frames[-1]
+
+
+def load_clip(path, size):
     """Decodes every frame of the video at `path` into a pygame Surface of `size`. Raises if it cannot."""
     import av   # PyAV: python3-av on the Pi. Imported here so a missing package falls back like a missing file
 
@@ -31,4 +50,4 @@ def load_video(path, size, loop_delay):
             frames.append(pygame.transform.smoothscale(surface, size).convert())
     if not frames:
         raise ValueError(f"no frames in {path}")
-    return IdleVideo(frames, fps, loop_delay)
+    return Clip(frames, fps)
