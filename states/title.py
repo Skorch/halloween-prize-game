@@ -8,6 +8,7 @@ class Title(State):
     def __init__(self, game) -> None:
         super().__init__(game)
         self.next_led_time = self.game.now() + 1
+        self.video_start = self.game.now()
 
     def update(self, delta_time, actions):
         if actions["space"] or actions["button"]:
@@ -42,11 +43,13 @@ class Title(State):
         
             
     def render(self, surface):
-        # 1. Loading and displaying the background image
-        bg_image_filename = "assets/backgrounds/background2.png"  # Update this with your image's path
-        bg_image = pygame.image.load(bg_image_filename)
-        bg_image = pygame.transform.smoothscale(bg_image, self.game.GAME_DIMENSIONS)
-        surface.blit(bg_image, (0, 0))
+        # The idle video, when it loaded, fills the screen with no text over it
+        if self.game.idle_video is not None:
+            surface.blit(self.game.idle_video.frame_at(self.game.now() - self.video_start), (0, 0))
+            return
+
+        # 1. Displaying the background image, loaded once by the game
+        surface.blit(self.game.title_background, (0, 0))
 
         # 2 & 3. Displaying the text with a contrasting background
         text_color = TEXT_COLOR_1

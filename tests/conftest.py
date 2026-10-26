@@ -41,12 +41,16 @@ def audio():
 
 @pytest.fixture
 def make_game(clock, hardware, audio):
-    """Builds a Game on the fakes. rng defaults to a seeded random source, so every run picks the same."""
+    """Builds a Game on the fakes. rng defaults to a seeded random source, so every run picks the same.
+
+    The title shows the still background unless a test passes idle_video_file: loading the video takes
+    about a second, which most tests do not need.
+    """
     import game
 
-    def make(rng=None, hardware=hardware):
+    def make(rng=None, hardware=hardware, idle_video_file=None):
         return game.Game(hardware=hardware, clock=clock, rng=rng if rng is not None else random.Random(1),
-                         audio=audio, fullscreen=False)
+                         audio=audio, fullscreen=False, idle_video_file=idle_video_file)
 
     yield make
     pygame.quit()

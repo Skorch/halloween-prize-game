@@ -20,9 +20,10 @@ The task starts once each note and skill it touches is in your context.
 |---|---|
 | `game.py` | The `Game` class: the loop, input, drawing helpers. It takes its hardware, clock, random source and sound as parameters; `main()` picks the real ones |
 | `states/` | One class per screen: `title.py` → `candy_picker.py` (spinning) → `winner.py` → back to title |
-| `config.py` | Every setting a person tunes: pins, prize stock, odds, text, timer, sounds |
+| `config.py` | Every setting a person tunes: pins, prize stock, odds, text, timer, sounds, the title video |
 | `prizes.py` | The prizes for one game: titles, sounds, cards, stock, odds, and the pick |
 | `audio.py` | `PygameAudio`, which loads and plays sounds through `pygame.mixer` |
+| `video.py` | `load_video`, which decodes the title screen's video once through PyAV (`av`) into a list of frames |
 | `pi2.py`, `buttonhandler.py`, `pi_sound.py` | Real GPIO on the Pi (button, LEDs) through `RPi.GPIO` from `rpi-lgpio` |
 | `pi_dev2.py` | Fake GPIO: logs LED changes; the spacebar stands in for the button |
 | `picker.py`, `pi.py`, `pi_dev.py` | The first version of the game; only each other import them, and nothing the game runs imports any of them |

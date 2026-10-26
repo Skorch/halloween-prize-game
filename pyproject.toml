@@ -5,6 +5,8 @@ description = "Raspberry Pi 5 powered prize game to hand out halloween candy"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "av==14.2.0",
+    "numpy==2.2.4",
     "pygame",
     # GPIO on the Pi only; it does not build on a Mac.
     "rpi-lgpio; sys_platform == 'linux'",

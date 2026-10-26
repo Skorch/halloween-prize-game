@@ -8,6 +8,7 @@ import pygame
 from audio import PygameAudio
 from prizes import Prizes
 from states.title import Title
+from video import load_video
 from config import GAME, HW, VISUAL, MESSAGES
 
 BUTTONS_SPACE = "space"
@@ -20,7 +21,8 @@ BUTTON_DELAY = HW.BUTTON_DELAY
 RGB_COUNT = GAME.RGB_COUNT
 
 class Game():
-    def __init__(self, hardware, clock=time, rng=None, audio=None, fullscreen=GAME.FULLSCREEN) -> None:
+    def __init__(self, hardware, clock=time, rng=None, audio=None, fullscreen=GAME.FULLSCREEN,
+                 idle_video_file=VISUAL.IDLE_VIDEO_FILE) -> None:
         """
         Args:
             hardware: the button and LEDs: the pi2 module on the Pi, pi_dev2 on a Mac, a fake in tests
@@ -28,7 +30,9 @@ class Game():
             rng: random source for prize picks; a new random.Random() if None
             audio: loads and plays sounds; PygameAudio() if None
             fullscreen: fill the display, or open a window of the game's size
+            idle_video_file: the video the title screen loops; None shows the still background instead
         """
+        self.idle_video_file = idle_video_file
         self.clock = clock
         self.rng = rng if rng is not None else random.Random()
         self.fullscreen = fullscreen
@@ -215,6 +219,19 @@ class Game():
             self.font_medium = pygame.font.SysFont(VISUAL.FONT_NAME, VISUAL.FONT_SIZE_MEDIUM)
             self.font_large = pygame.font.SysFont(VISUAL.FONT_NAME, VISUAL.FONT_SIZE_LARGE)
             self.font_xlarge = pygame.font.SysFont(VISUAL.FONT_NAME, VISUAL.FONT_SIZE_XLARGE)
+
+        # Title screen background, loaded once here because the title screen is made again after every round
+        title_background = pygame.image.load(VISUAL.TITLE_BACKGROUND_FILE)
+        self.title_background = pygame.transform.smoothscale(title_background, self.GAME_DIMENSIONS).convert()
+        self.idle_video = None
+        if self.idle_video_file is not None:
+            try:
+                self.idle_video = load_video(self.idle_video_file, self.GAME_DIMENSIONS,
+                                             VISUAL.IDLE_VIDEO_LOOP_DELAY)
+                logger.info(f"Loaded idle video: {self.idle_video_file}, {len(self.idle_video.frames)} frames")
+            except Exception as e:
+                logger.error(f"Failed to load idle video '{self.idle_video_file}': {e}")
+                logger.info(f"Falling back to the still background: {VISUAL.TITLE_BACKGROUND_FILE}")
 
         # Default font for backward compatibility
         self.font = self.font_small

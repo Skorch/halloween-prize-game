@@ -1,7 +1,8 @@
 # Testing
 
 `uv run pytest` plays whole rounds of the game with no window and no sound, on fakes, and finishes in about
-two seconds on the Mac. It also passes on the Pi (2026-10-26, in a scratch environment with pytest added).
+seven seconds on the Mac, three of them loading the title video. It also passed on the Pi (2026-10-26, in a
+scratch environment with pytest added), before the title video was added.
 
 ## How a test controls the game
 
@@ -15,6 +16,7 @@ two seconds on the Mac. It also passes on the Pi (2026-10-26, in a scratch envir
 | `rng` | `random.Random()` | `random.Random(seed)` or `ScriptedPicks([...])` | a seed gives the same picks every run; `ScriptedPicks` names each prize type in order |
 | `audio` | `PygameAudio` | `FakeAudio` | reads `played`, the file name of each sound in order |
 | `fullscreen` | `True` | `False` | |
+| `idle_video_file` | `VISUAL.IDLE_VIDEO_FILE` | `None`, unless the test passes a path | `None` shows the still background. Loading the video takes about a second, so only the tests in `tests/test_idle_video.py` load it |
 
 `tests/conftest.py` sets SDL's `dummy` video and audio drivers before pygame starts, and moves into the repo
 folder, since the game loads files by relative path.

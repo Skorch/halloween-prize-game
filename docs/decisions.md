@@ -24,3 +24,13 @@ changes an earlier one says so.
    (`test_stock_goes_down_when_a_prize_is_won`); the fix is a change of its own.
 10. **The button is measured from the game's own log**, not a separate script (completes decision 7). Two real
     presses recorded on the Pi are replayed by the tests; with them every press starts or stops a round.
+11. **The title screen loops a video**, `assets/backgrounds/skeleton.mp4`, with no text over it and no sound. At
+    the end it holds its last frame for `IDLE_VIDEO_LOOP_DELAY` (5 s) before it plays again.
+    If it fails to load, the title shows `background2.png` with its message, as before. An mp3 played over
+    the video may come later.
+12. **PyAV decodes the video**, because the Pi already has it (`python3-av`); OpenCV would add 81 packages.
+13. **Every frame is decoded once, when the game starts**, and kept in memory, so the loop restarts without
+    a pause and the fake clock picks the frame in tests. The cost on the Pi: 3.9 s at startup and about
+    600 MB of its 4 GB.
+14. **Loading is made efficient where needed**: the title's video and still background load once in
+    `Game`, not on every frame or every round. Anything else changes only if measuring on the Pi shows it is needed.

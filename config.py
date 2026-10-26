@@ -62,6 +62,11 @@ class VisualConfig:
     TEXT_COLOR_1 = (138, 3, 3)          # Primary text color (dark red)
     TEXT_BG_1 = (0, 0, 0)               # Primary text background (black)
 
+    # Title Screen Background
+    IDLE_VIDEO_FILE = "assets/backgrounds/skeleton.mp4"  # Loops on the title screen, with no text; None = use the image below
+    IDLE_VIDEO_LOOP_DELAY = 5           # Seconds the last frame stays up before the video plays again
+    TITLE_BACKGROUND_FILE = "assets/backgrounds/background2.png"  # Shown with the title message when there is no video, or it fails to load
+
     # Text Background Configuration (for candy picker screen)
     SHOW_PRIZE_TEXT = False              # Show prize text during candy flipping (True/False)
     SHOW_TEXT_BACKGROUND = False         # Show background behind prize text (True/False)

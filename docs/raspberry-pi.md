@@ -22,6 +22,9 @@ To find it when the name does not answer: `dns-sd -B _workstation._tcp local.` l
 | Operating system | Debian GNU/Linux 13 (trixie) |
 | Python | 3.13.5, `/usr/bin/python3` |
 | pygame | 2.6.1 from the Debian package `python3-pygame` (SDL 2.32.4) |
+| Video decoding | PyAV 14.2.0 (`python3-av`) and numpy 2.2.4 (`python3-numpy`), both already installed; `pyproject.toml` pins the same versions for the Mac |
+| Memory | 4 GB, 3.3 GB free with the game running (2026-10-26) |
+| Title video cost | Decoding all 121 frames of `assets/backgrounds/skeleton.mp4` at startup took 3.9 s and raised the process's memory from 117 MB to 724 MB; decoding alone ran at 70 frames a second, against the 24 the video plays at (2026-10-26, measured with the game also running) |
 | Repo folder | `/home/pi/Documents/halloween-prize-game` |
 | Started by | `launch.sh`, from the desktop session: the game's output goes to `~/.xsession-errors`. What starts `launch.sh` at boot is not known: no systemd service names the game and `pi`'s crontab is empty |
 | Display | HDMI, "TXD Display"; it prefers 1280x800. The game asks for 1000x666 fullscreen (`config.GAME.FULLSCREEN_MODE`) and gets 1024x768, as `~/.xsession-errors` shows: `Display: 1024x768, Game canvas: 1024x1024, Screen: 1024x768` |
