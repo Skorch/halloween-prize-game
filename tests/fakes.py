@@ -2,6 +2,19 @@
 import random
 
 
+# Two presses of the real button, recorded on the Pi on 2026-10-26 from the game's own log
+# (~/.xsession-errors): (seconds after the first edge, pin read high). A press flickers for 0.06-0.23 s.
+RECORDED_PRESSES = [
+    [(0.0, True), (0.0249, False), (0.0306, False), (0.0309, False), (0.0338, True), (0.0401, False),
+     (0.0504, True), (0.0561, False)],
+    [(0.0, True), (0.0073, False), (0.0167, True), (0.0253, False), (0.0337, True), (0.0407, False),
+     (0.0502, True), (0.0574, False), (0.0668, True), (0.074, False), (0.0835, True), (0.0906, False),
+     (0.1001, True), (0.1073, False), (0.1167, True), (0.124, False), (0.1334, True), (0.1406, False),
+     (0.15, True), (0.1573, False), (0.1666, True), (0.1739, False), (0.1833, True), (0.1906, False),
+     (0.1999, True), (0.2072, False), (0.2167, True), (0.2238, False), (0.2337, False), (0.2339, False)],
+]
+
+
 class FakeClock:
     """A clock that moves only when a test calls advance(). Game calls it like time.time."""
 
@@ -65,6 +78,13 @@ class FakeHardware:
         """A press with no bounce: one rising edge, then one falling edge."""
         self.edge(True)
         self.edge(False)
+
+    def recorded_press(self, clock, edges):
+        """A press replayed edge by edge, moving the fake clock to each edge's time (see RECORDED_PRESSES)."""
+        start = clock.now
+        for seconds, high in edges:
+            clock.now = start + seconds
+            self.edge(high)
 
     def count(self, name):
         return sum(1 for call in self.calls if call[0] == name)

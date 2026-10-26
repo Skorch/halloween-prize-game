@@ -43,3 +43,9 @@ When the Pi holds commits or edits of its own, carry them to the Mac first: comm
 the push.
 
 Pins for the button and LEDs are set in `config.py` (`HardwareConfig`).
+
+## The button
+
+The big button bounces: each press flickers on and off for 0.06 to 0.23 s (two presses measured on
+2026-10-26). The game logs every edge it sees, with the time since the last press, as `button_pressed: ...
+butonDT ...` lines in `~/.xsession-errors`; `tests/fakes.py` (`RECORDED_PRESSES`) holds those two presses.

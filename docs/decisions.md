@@ -22,3 +22,5 @@ changes an earlier one says so.
 8. **Fakes live in `tests/fakes.py`**, so the game's own code holds only what the game runs.
 9. **Stock that never goes down is a known bug**, recorded as a test that is expected to fail
    (`test_stock_goes_down_when_a_prize_is_won`); the fix is a change of its own.
+10. **The button is measured from the game's own log**, not a separate script (completes decision 7). Two real
+    presses recorded on the Pi are replayed by the tests; with them every press starts or stops a round.

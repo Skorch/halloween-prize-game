@@ -36,17 +36,17 @@ def test_press_starts_a_spin(make_game, hardware, audio, snap):
 
 - **Derive numbers from the code or config** (`STEP_RATE_CURVE`, `VISUAL.TIMER_START_SECONDS`, the stock in
   `config.py`), so a tuning change does not break a test.
-- **Round tests press the spacebar.** The GPIO button path has its own tests in `tests/test_button.py`: with one
-  clean edge per press, the code reads every second press as a release, so it cannot drive a round until the
-  real button's edges are measured (decision 7).
+- **Round tests press the spacebar.** The GPIO button path has its own tests in `tests/test_button.py`, which
+  replay presses recorded from the real button (`hardware.recorded_press(clock, RECORDED_PRESSES[0])`). A press
+  with one clean edge (`clean_press()`) behaves differently: the code reads every second one as a release.
 - **Look at the screens** a change affects: `tests/out/` is gitignored and rewritten on each run.
 - **A known bug** gets a test marked `@pytest.mark.xfail(strict=True, reason=...)`; it fails the suite once the
   bug is fixed, so the mark comes off with the fix.
 
 ## What the suite does not cover
 
-- **The real pins** (`pi2.py`), real sound (`audio.py`'s `PygameAudio`), `game.main()`, and how the real button
-  bounces.
+- **The real pins** (`pi2.py`), real sound (`audio.py`'s `PygameAudio`), and `game.main()`. The button's
+  bounce is covered only as far as the two recorded presses go.
 - **The fullscreen size**: the dummy driver has one mode, so only the Pi shows which mode the display picks.
 
 After a change to any of them, deploy to the Pi and play a round ([raspberry-pi.md](raspberry-pi.md)).
