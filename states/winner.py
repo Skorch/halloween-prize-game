@@ -1,6 +1,5 @@
 from states.state import State
 import pygame
-from time import time
 from colors import *
 from config import MESSAGES, VISUAL
 
@@ -10,13 +9,13 @@ class Winner(State):
     def __init__(self, game, prize) -> None:
         super().__init__(game)
         self.prize = prize
-        self.win_time = time()
+        self.win_time = self.game.now()
         self.has_rendered = False
 
 
 
     def update(self, delta_time, actions):
-        now = time()
+        now = self.game.now()
         if actions["space"] or actions["button"]:
             self.game.reset_states()
         if now - self.win_time >= RESET_DELAY:

@@ -3,12 +3,8 @@ import time
 
 import pygame
 
-import config
-
-config.GAME.DEV_MODE = True      # fake GPIO; set before game.py is imported
-config.GAME.FULLSCREEN = False
-
 import game as game_module
+import pi_dev2
 
 
 def run_for(g, seconds):
@@ -33,7 +29,7 @@ def screen_name(g):
 
 
 def test_one_round_on_the_real_clock():
-    g = game_module.Game()
+    g = game_module.Game(pi_dev2, fullscreen=False)
     run_for(g, 0.2)
     assert screen_name(g) == "Title"
 

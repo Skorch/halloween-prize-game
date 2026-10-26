@@ -1,18 +1,14 @@
 from asyncio.log import logger
+import logging
 import os
+import random
 from time import time
 import pygame
 
+from audio import PygameAudio
+from prizes import Prizes
 from states.title import Title
 from config import GAME, HW, VISUAL, MESSAGES
-
-# Dev/Prod mode selection from config
-if not GAME.DEV_MODE:
-    import pi2 as pi
-    print("prod")
-else:
-    import pi_dev2 as pi
-    print("dev")
 
 BUTTONS_SPACE = "space"
 BUTTONS_BUTTON = "button"
@@ -24,8 +20,22 @@ BUTTON_DELAY = HW.BUTTON_DELAY
 RGB_COUNT = GAME.RGB_COUNT
 
 class Game():
-    def __init__(self) -> None:
+    def __init__(self, hardware, clock=time, rng=None, audio=None, fullscreen=GAME.FULLSCREEN) -> None:
+        """
+        Args:
+            hardware: the button and LEDs: the pi2 module on the Pi, pi_dev2 on a Mac, a fake in tests
+            clock: returns the time in seconds, like time.time
+            rng: random source for prize picks; a new random.Random() if None
+            audio: loads and plays sounds; PygameAudio() if None
+            fullscreen: fill the display, or open a window of the game's size
+        """
+        self.clock = clock
+        self.rng = rng if rng is not None else random.Random()
+        self.fullscreen = fullscreen
         pygame.init()
+        self.audio = audio if audio is not None else PygameAudio()
+        self.prizes = Prizes(self.audio, self.rng)
+        self.image_cache = {}
         display_info = pygame.display.Info()
 
         # Game canvas size (internal rendering resolution)
@@ -34,20 +44,20 @@ class Game():
 
         # Screen size (actual display resolution)
         # Use actual display resolution for fullscreen, or config values for windowed
-        if GAME.FULLSCREEN:
+        if self.fullscreen:
             self.SCREEN_WIDTH, self.SCREEN_HEIGHT = display_info.current_w, display_info.current_h
         else:
             self.SCREEN_WIDTH, self.SCREEN_HEIGHT = self.GAME_W, self.GAME_H
 
         self.SCREEN_DIMENSIONS = (self.SCREEN_WIDTH, self.SCREEN_HEIGHT)
         print(f"Display: {display_info.current_w}x{display_info.current_h}, Game canvas: {self.GAME_W}x{self.GAME_H}, Screen: {self.SCREEN_WIDTH}x{self.SCREEN_HEIGHT}")
-        self.pi = pi
+        self.hardware = hardware
 
-        self.pi.gpio_setup(self.button_press)
+        self.hardware.gpio_setup(self.button_press)
         # print("setting canvas")
         self.game_canvas = pygame.Surface(self.GAME_DIMENSIONS)
         # print("setting screen")
-        if GAME.FULLSCREEN:
+        if self.fullscreen:
             self.screen = pygame.display.set_mode(self.SCREEN_DIMENSIONS, pygame.FULLSCREEN)
         else:
             self.screen = pygame.display.set_mode(self.SCREEN_DIMENSIONS)
@@ -55,7 +65,7 @@ class Game():
 
         self.running, self.playing = True, True
         self.button_pressed = False
-        self.button_last_time = time()
+        self.button_last_time = self.now()
         self.rgb_count = RGB_COUNT
         self.actions = {
             BUTTONS_SPACE: False, 
@@ -68,18 +78,21 @@ class Game():
         self.load_assets()
         self.load_states()
 
+    def now(self):
+        return self.clock()
+
     def quit_game(self):
-        self.pi.clean()
+        self.hardware.clean()
         
     def button_press(self, ev):
         
-        gpio_value = self.pi.is_button_pressed()
+        gpio_value = self.hardware.is_button_pressed()
         
-        now = time()
+        now = self.now()
 
         button_dt = now - self.button_last_time
 
-        logger.debug(f"button_pressed: {self.button_pressed} GPIO: {gpio_value} / {self.pi.button_state()} butonDT {button_dt}")
+        logger.debug(f"button_pressed: {self.button_pressed} GPIO: {gpio_value} / {self.hardware.button_state()} butonDT {button_dt}")
         
         if not self.button_pressed and gpio_value and button_dt > BUTTON_DELAY:
             self.button_last_time = now
@@ -99,15 +112,19 @@ class Game():
     def game_loop(self):
         # print("starting loop")
         while self.playing:
-            self.get_dt()
-            self.get_events()
-            self.update()
-            self.render()
+            self.step()
             # print("loop")
+
+    def step(self):
+        """One frame: time, events, update, draw."""
+        self.get_dt()
+        self.get_events()
+        self.update()
+        self.render()
 
     def get_events(self) -> None:
         # print("get events")
-        # logger.debug(self.pi.button_state())
+        # logger.debug(self.hardware.button_state())
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.playing = False
@@ -144,7 +161,7 @@ class Game():
 
     def get_dt(self):
         # print("get_dt")
-        now = time()
+        now = self.now()
         self.dt = now - self.prev_time
         self.prev_time = now
 
@@ -172,8 +189,7 @@ class Game():
         surface.blit(text_surface, text_rect)
 
     def play_sound(self, sound):
-        pygame.mixer.Sound.play(sound)
-        pygame.mixer.music.stop()
+        self.audio.play(sound)
         
     def load_assets(self):
         # print("loading assets")
@@ -238,35 +254,47 @@ class Game():
 
     def beep_on(self, ticker_index):
         # logger.debug("beep on")
-        self.pi.start_beep(ticker_index)
+        self.hardware.start_beep(ticker_index)
 
     def beep_off(self):
         # logger.debug("beep off")
-        self.pi.stop_beep()
+        self.hardware.stop_beep()
 
         
     def toggle_led(self):
         # logger.debug("led on")
-        self.pi.toggle_led()
+        self.hardware.toggle_led()
     def led_on(self):
         # logger.debug("led on")
-        self.pi.led_on()
+        self.hardware.led_on()
 
     def led_off(self):
         # logger.debug("led off")
-        self.pi.led_off()
+        self.hardware.led_off()
 
     def set_rgb_leds(self, colors):
         # logger.debug("set rgb leds")
-        self.pi.set_rgb_leds(colors)
+        self.hardware.set_rgb_leds(colors)
     
     def clear_rgb_leds(self):
         # logger.debug("clear rgb leds")
-        self.pi.clear_rgb_leds()
+        self.hardware.clear_rgb_leds()
         
 def main():
     """Main entry point for the Halloween Prize Game"""
-    g = Game()
+    logging.basicConfig(level=logging.DEBUG)  # picker.py set this when it was imported
+
+    # Dev mode: fake GPIO (spacebar is the button) in a window. HALLOWEEN_DEV=1 turns it on
+    # without editing config.py, which the Pi reads as committed.
+    dev_mode = GAME.DEV_MODE or os.environ.get("HALLOWEEN_DEV") == "1"
+    if dev_mode:
+        import pi_dev2 as hardware
+        print("dev")
+    else:
+        import pi2 as hardware
+        print("prod")
+
+    g = Game(hardware, fullscreen=GAME.FULLSCREEN and not dev_mode)
     print("starting")
     while g.running:
         g.game_loop()

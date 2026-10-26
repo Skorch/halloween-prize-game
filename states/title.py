@@ -3,12 +3,11 @@ from states.candy_picker import CandyPicker
 from colors import *
 from config import MESSAGES
 import pygame
-from time import time
 
 class Title(State):
     def __init__(self, game) -> None:
         super().__init__(game)
-        self.next_led_time = time() + 1
+        self.next_led_time = self.game.now() + 1
 
     def update(self, delta_time, actions):
         if actions["space"] or actions["button"]:
@@ -16,7 +15,7 @@ class Title(State):
             new_state.enter_state()
         else:
 
-            now = time()
+            now = self.game.now()
             dt_led = self.next_led_time - now
             # print(f"candy picker update dt={dt}")
             # logger.debug(f"dt_led: {dt_led}; dt: {dt}")    
@@ -24,7 +23,7 @@ class Title(State):
             if dt_led <= 0:
                 # logger.debug(f"turning LED off for {dt_led}")
                 self.toggle_led()
-                self.next_led_time = time() + 1
+                self.next_led_time = self.game.now() + 1
 
         self.game.reset_keys()
 

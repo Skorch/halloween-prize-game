@@ -1,80 +1,12 @@
-import pygame, os, glob, random, math
-from time import time
-from picker import get_new_image
+import pygame, math
 from states.state import State
 from states.winner import Winner
 from colors import *
-from config import MESSAGES, PRIZES, VISUAL
+from config import MESSAGES, VISUAL
 from asyncio.log import logger
-
-# =============================================================================
-# PRIZE SETUP - Built from config
-# =============================================================================
-
-# Build prize data structures from config
-def build_prize_data():
-    """Build prize structures from PRIZES config"""
-    _titles = {}
-    _sounds = {}
-    _assets = {}
-    _inventory = {}
-
-    # Add mini candy
-    _titles["mini"] = PRIZES.PRIZE_CATEGORIES["mini"]["title"]
-    _sounds["mini"] = pygame.mixer.Sound(PRIZES.PRIZE_CATEGORIES["mini"]["sound_file"])
-    _assets["mini"] = glob.glob(PRIZES.PRIZE_CATEGORIES["mini"]["folder"])
-    _inventory["mini"] = PRIZES.MINI_CANDY_INVENTORY
-
-    # Add playdough (if available)
-    if PRIZES.PLAYDOUGH_INVENTORY > 0:
-        _titles["playdough"] = PRIZES.PRIZE_CATEGORIES["playdough"]["title"]
-        _sounds["playdough"] = pygame.mixer.Sound(PRIZES.PRIZE_CATEGORIES["playdough"]["sound_file"])
-        _assets["playdough"] = glob.glob(PRIZES.PRIZE_CATEGORIES["playdough"]["folder"])
-        _inventory["playdough"] = PRIZES.PLAYDOUGH_INVENTORY
-
-    # Add big prize (use configured type: skull or full_size)
-    big_prize_key = PRIZES.BIG_PRIZE_TYPE
-    _titles["big_prize"] = PRIZES.PRIZE_CATEGORIES[big_prize_key]["title"]
-    _sounds["big_prize"] = pygame.mixer.Sound(PRIZES.PRIZE_CATEGORIES[big_prize_key]["sound_file"])
-    _assets["big_prize"] = glob.glob(PRIZES.PRIZE_CATEGORIES[big_prize_key]["folder"])
-    _inventory["big_prize"] = PRIZES.BIG_PRIZE_INVENTORY
-
-    # Beep sound
-    _sounds["beep"] = pygame.mixer.Sound(PRIZES.BEEP_SOUND_FILE)
-
-    return _titles, _sounds, _assets, _inventory
-
-def calculate_probabilities(inventory):
-    """Calculate probabilities based on remaining inventory"""
-    if not PRIZES.USE_INVENTORY_PROBABILITIES:
-        # Use fixed probabilities
-        return PRIZES.FIXED_PROBABILITIES.copy()
-
-    # Calculate inventory-based probabilities
-    total = sum(inventory.values())
-    if total == 0:
-        # Fallback if somehow all inventory is zero
-        logger.warning("All prize inventory is zero! Using equal probabilities")
-        return {key: 1.0 / len(inventory) for key in inventory.keys()}
-
-    # Probability proportional to inventory
-    probabilities = {key: count / total for key, count in inventory.items()}
-    logger.debug(f"Calculated probabilities from inventory: {probabilities}")
-    return probabilities
-
-# Initialize prize data
-titles, sounds, assets, inventory = build_prize_data()
-prize_probability = calculate_probabilities(inventory)
-
-# Set sound volumes
-for sound_key in sounds:
-    sounds[sound_key].set_volume(PRIZES.DEFAULT_SOUND_VOLUME)
-
-cached_assets = {}
 
 # Game timing and LED settings
 STEP_RATE_CURVE = [0.75, 0.75, 0.75, 0.5, 0.5, 0.5, 0.5, 0.25, 0.25, 0.25, 0.25, 0.2, 0.2, 0.2, 0.15, 0.15, 0.15, 0.15, 0.1]
-MIN_FULL_SIZE_TICK = PRIZES.MIN_SPINS_FOR_BIG_PRIZE
 GREEN = (0, 255, 0)
 OFF = (0, 0, 0)
 RGB_COLOR_SEQUENCE = [[GREEN, OFF, OFF, OFF], [OFF, GREEN, OFF, OFF], [OFF, OFF, GREEN, OFF], [OFF, OFF, OFF, GREEN]]
@@ -89,7 +21,7 @@ class CandyPicker(State):
 
         # Timer initialization
         if VISUAL.TIMER_ENABLED:
-            self.timer_start_time = time()
+            self.timer_start_time = self.game.now()
             self.timer_remaining = VISUAL.TIMER_START_SECONDS
             print(f"[TIMER] Initialized: duration={VISUAL.TIMER_START_SECONDS}s, show_at={VISUAL.TIMER_SHOW_AT_SECONDS}s")
             logger.info(f"Timer initialized: start_time={self.timer_start_time}, duration={VISUAL.TIMER_START_SECONDS}s")
@@ -98,7 +30,7 @@ class CandyPicker(State):
             self.timer_remaining = None
 
         self.get_new_image()
-        self.last_image_update = time()
+        self.last_image_update = self.game.now()
 
         # Trigger LED and beep for the first image (subsequent images triggered in update())
         self.led_on()
@@ -113,7 +45,7 @@ class CandyPicker(State):
         # Update timer if enabled
         timer_expired = False
         if VISUAL.TIMER_ENABLED and self.timer_start_time is not None:
-            elapsed = time() - self.timer_start_time
+            elapsed = self.game.now() - self.timer_start_time
             self.timer_remaining = VISUAL.TIMER_START_SECONDS - elapsed
 
             if self.timer_remaining <= 0:
@@ -135,7 +67,7 @@ class CandyPicker(State):
             new_state.enter_state()
         else:
 
-            now = time()
+            now = self.game.now()
             dt = self.next_image_time - now
             dt_rgb = self.next_rgb_time - now
             dt_led = self.next_led_time - now
@@ -144,7 +76,7 @@ class CandyPicker(State):
 
             if dt_rgb <= 0:
                 self.update_rgb()
-                self.next_rgb_time = time() + self.get_step_rate()/4.0
+                self.next_rgb_time = self.game.now() + self.get_step_rate()/4.0
 
             if dt <= 0:
                 self.get_new_image()
@@ -158,7 +90,7 @@ class CandyPicker(State):
             # pass
                 
     def render(self, surface, limit_vertical=False):
-        global cached_assets
+        cached_assets = self.game.image_cache
         # Clearing the screen by filling with a background color
         BLACK = (0, 0, 0)  # RGB value for black
         surface.fill(BLACK)
@@ -243,34 +175,8 @@ class CandyPicker(State):
     
     def pick_prize(self):
         """Pick a prize based on configured probabilities and inventory"""
-
-        # Filter out big_prize if minimum spins not reached
-        prize_types = list(filter(
-            lambda prize: prize != 'big_prize' or self.current_tick >= MIN_FULL_SIZE_TICK,
-            prize_probability.keys()
-        ))
-
-        # Get weights for filtered prize types
-        weights = [prize_probability[prize] for prize in prize_types]
-
-        # Pick a prize type
-        pick = random.choices(prize_types, weights=weights)[0]
-        logger.info(f"Prize picked: {pick} (tick {self.current_tick})")
-
-        # Select a random image file for this prize type
         prev_filename = self.current_prize["filename"] if self.current_prize else ''
-        next_filename = None
-        while not next_filename:
-            file_choice = random.choice(assets[pick])
-            if file_choice and file_choice != prev_filename:
-                next_filename = file_choice
-
-        return {
-            "type": pick,
-            "filename": next_filename,
-            "title": titles[pick],
-            "sound": sounds[pick]
-        }
+        return self.game.prizes.pick(self.current_tick, prev_filename)
 
 
     def get_step_rate(self):
@@ -279,10 +185,11 @@ class CandyPicker(State):
     def get_new_image(self):
 
         next_step = self.get_step_rate()
-        self.next_rgb_time = time() + next_step/4.0
-        self.next_image_time = time() + next_step
-        self.next_beep_time = time() + next_step/2.0
-        self.next_led_time = time() + next_step/2.0
+        now = self.game.now()
+        self.next_rgb_time = now + next_step/4.0
+        self.next_image_time = now + next_step
+        self.next_beep_time = now + next_step/2.0
+        self.next_led_time = now + next_step/2.0
         self.current_tick += 1
         # print(f"next tick time: {self.next_image_time}")
         # print(f"next beep time: {self.next_beep_time}")
@@ -297,7 +204,7 @@ class CandyPicker(State):
         self.game.led_off()
         
     def play_beep(self):
-        beep = sounds["beep"]
+        beep = self.game.prizes.sounds["beep"]
         self.game.play_sound(beep)
 
     #cycle through a sequence of 4 turning each LED on with a spooky green RGB color
