@@ -24,7 +24,9 @@ To find it when the name does not answer: `dns-sd -B _workstation._tcp local.` l
 | pygame | 2.6.1 from the Debian package `python3-pygame` (SDL 2.32.4) |
 | Video decoding | PyAV 14.2.0 (`python3-av`) and numpy 2.2.4 (`python3-numpy`), both already installed; `pyproject.toml` pins the same versions for the Mac |
 | Memory | 4 GB, 3.3 GB free with the game running (2026-10-26) |
-| Title video cost | Decoding all 121 frames of `assets/backgrounds/skeleton.mp4` at startup took 3.9 s and raised the process's memory from 117 MB to 724 MB; decoding alone ran at 70 frames a second, against the 24 the video plays at (2026-10-26, measured with the game also running) |
+| Idle clips' cost | The five clips in `assets/idle/` (360 frames, 12 s) load in about 12 s at startup, and the game then holds 1.66 GB, leaving 1.87 GB available. Decoding alone runs at about 70 frames a second (measured on a 960x960 clip), against the 30 the clips play at (2026-10-26) |
+| Processor use | One core at 31% with the loop capped at 30 frames a second; 105% before the cap (2026-10-26, from `top`) |
+| Restarting the game over SSH | `XAUTHORITY=/home/pi/.Xauthority WAYLAND_DISPLAY=wayland-0 XDG_RUNTIME_DIR=/run/user/1000 setsid nohup ./launch.sh > ~/game.log 2>&1 < /dev/null &` from the repo folder starts it on the display; the SSH command does not return by itself afterwards, and stopping it leaves the game running |
 | Repo folder | `/home/pi/Documents/halloween-prize-game` |
 | Started by | `launch.sh`, from the desktop session: the game's output goes to `~/.xsession-errors`. What starts `launch.sh` at boot is not known: no systemd service names the game and `pi`'s crontab is empty |
 | Display | HDMI, "TXD Display"; it prefers 1280x800. The game asks for 1000x666 fullscreen (`config.GAME.FULLSCREEN_MODE`) and gets 1024x768, as `~/.xsession-errors` shows: `Display: 1024x768, Game canvas: 1024x1024, Screen: 1024x768` |
