@@ -133,3 +133,5 @@ dmypy.json
 .pyre/
 
 *.DS_Store
+# Screens saved by the tests
+tests/out/

@@ -6,8 +6,17 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "pygame",
-    "rpi-lgpio",
+    # GPIO on the Pi only; it does not build on a Mac.
+    "rpi-lgpio; sys_platform == 'linux'",
+]
+
+[dependency-groups]
+dev = [
+    "pytest==9.1.1",
 ]
 
 [project.scripts]
 halloween-game = "game:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
