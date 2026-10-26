@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "pygame-core": {
+      "source": "gamedev-skills/awesome-gamedev-agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/other-engines/pygame-core/SKILL.md",
+      "computedHash": "014542e6b9435f0f609ecace0b8392a88bcd8f5b1648d8482f4945803fef53aa"
+    }
+  }
+}
