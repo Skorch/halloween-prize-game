@@ -221,8 +221,6 @@ class CandyPicker(State):
         """Draw countdown timer as text in a circle"""
         # Calculate seconds remaining (round up to show whole seconds)
         seconds = math.ceil(self.timer_remaining)
-        print(f"[TIMER] Drawing: {seconds}s at pos ({VISUAL.TIMER_POSITION_X}, {VISUAL.TIMER_POSITION_Y}), radius {VISUAL.TIMER_CIRCLE_RADIUS}")
-        logger.debug(f"Drawing timer: {seconds} seconds at ({VISUAL.TIMER_POSITION_X}, {VISUAL.TIMER_POSITION_Y})")
 
         # Create a surface for the circle with alpha channel
         circle_surface = pygame.Surface((VISUAL.TIMER_CIRCLE_RADIUS * 2, VISUAL.TIMER_CIRCLE_RADIUS * 2), pygame.SRCALPHA)
@@ -235,20 +233,8 @@ class CandyPicker(State):
             VISUAL.TIMER_CIRCLE_RADIUS
         )
 
-        # Calculate font size proportional to circle radius (about 60% of diameter)
-        font_size = int(VISUAL.TIMER_CIRCLE_RADIUS * 1.2)
-
-        # Create font for timer - use same font as game
-        if VISUAL.FONT_USE_TTF:
-            try:
-                timer_font = pygame.font.Font(VISUAL.FONT_TTF_PATH, font_size)
-            except:
-                timer_font = pygame.font.SysFont(VISUAL.FONT_NAME, font_size)
-        else:
-            timer_font = pygame.font.SysFont(VISUAL.FONT_NAME, font_size)
-
-        # Render the countdown number
-        timer_text = timer_font.render(str(seconds), True, VISUAL.TIMER_TEXT_COLOR)
+        # Render the countdown number, in the font the game loaded once for it
+        timer_text = self.game.font_timer.render(str(seconds), True, VISUAL.TIMER_TEXT_COLOR)
         text_rect = timer_text.get_rect(center=(VISUAL.TIMER_CIRCLE_RADIUS, VISUAL.TIMER_CIRCLE_RADIUS))
 
         # Draw text on circle surface

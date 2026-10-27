@@ -158,9 +158,9 @@ class Game():
         # print("render")
         self.state_stack[-1].render(self.game_canvas)
 
-        self.screen.blit(pygame.transform.scale(self.game_canvas, self.SCREEN_DIMENSIONS), (0, 0))
-        pygame.display.flip()
-        pygame.display.update()
+        # Scales straight into the screen, so no new screen-sized surface is made and copied each frame
+        pygame.transform.scale(self.game_canvas, self.SCREEN_DIMENSIONS, self.screen)
+        pygame.display.flip()   # once: display.update() with no arguments would send the same frame again
 
     def get_dt(self):
         # print("get_dt")
@@ -222,6 +222,16 @@ class Game():
             self.font_medium = pygame.font.SysFont(VISUAL.FONT_NAME, VISUAL.FONT_SIZE_MEDIUM)
             self.font_large = pygame.font.SysFont(VISUAL.FONT_NAME, VISUAL.FONT_SIZE_LARGE)
             self.font_xlarge = pygame.font.SysFont(VISUAL.FONT_NAME, VISUAL.FONT_SIZE_XLARGE)
+
+        # Countdown timer font, sized to its circle (about 60% of the diameter); loaded once here, not every frame
+        timer_font_size = int(VISUAL.TIMER_CIRCLE_RADIUS * 1.2)
+        try:
+            if VISUAL.FONT_USE_TTF:
+                self.font_timer = pygame.font.Font(VISUAL.FONT_TTF_PATH, timer_font_size)
+            else:
+                self.font_timer = pygame.font.SysFont(VISUAL.FONT_NAME, timer_font_size)
+        except Exception:
+            self.font_timer = pygame.font.SysFont(VISUAL.FONT_NAME, timer_font_size)
 
         # Title screen background, loaded once here because the title screen is made again after every round
         title_background = pygame.image.load(VISUAL.TITLE_BACKGROUND_FILE)
