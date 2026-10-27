@@ -58,3 +58,8 @@ changes an earlier one says so.
     `background2.png` with its message.
 20. **Every change to what the game does comes with a test that fails without it**, and a test of existing
     behaviour is updated to match, not deleted. Before, the rules asked only that `uv run pytest` pass.
+21. **Each frame goes to the display once, and the countdown loads its font once**, ahead of a measured need
+    (decision 14 asked for one first). `render()` scales the canvas straight into the screen and calls only
+    `display.flip()`; the countdown's font loads in `load_assets`. On the Pi the title screen went from 30% to
+    17% of one core. Turning the LEDs off on every frame of the winner screen stays as it is, until LED strip
+    work replaces it.

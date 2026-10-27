@@ -25,7 +25,7 @@ To find it when the name does not answer: `dns-sd -B _workstation._tcp local.` l
 | Video decoding | PyAV 14.2.0 (`python3-av`) and numpy 2.2.4 (`python3-numpy`), both already installed; `pyproject.toml` pins the same versions for the Mac |
 | Memory | 4 GB, 3.3 GB free with the game running (2026-10-26) |
 | Idle video's cost | The curtain clip and the show in `assets/idle/` (420 frames: 60 + 360) decode once at startup. The game then holds 1.94 GB, leaving 1.59 GB available (2026-10-26, branch `title-show-v2`). Decoding alone runs at about 70 frames a second (measured on a 960x960 clip), against the 30 the video plays at |
-| Processor use | One core at 31% with the loop capped at 30 frames a second; 105% before the cap (2026-10-26, from `top`) |
+| Processor use | One core at 17% on the title screen, with each frame sent to the display once; 30% before that change, and 105% before the loop was capped at 30 frames a second (2026-10-26; the game's own processor time from `/proc/<pid>/stat` over 66 s, three title loops) |
 | Restarting the game over SSH | `XAUTHORITY=/home/pi/.Xauthority WAYLAND_DISPLAY=wayland-0 XDG_RUNTIME_DIR=/run/user/1000 setsid nohup ./launch.sh > ~/game.log 2>&1 < /dev/null &` from the repo folder starts it on the display; the SSH command does not return by itself afterwards, and stopping it leaves the game running |
 | Repo folder | `/home/pi/Documents/halloween-prize-game` |
 | Started by | `launch.sh`, from the desktop session: the game's output goes to `~/.xsession-errors`. What starts `launch.sh` at boot is not known: no systemd service names the game and `pi`'s crontab is empty |
