@@ -56,3 +56,5 @@ changes an earlier one says so.
     with. The crackle is now `sounds/crackle-loop.wav`, cut to loop without a gap, and keeps playing through the
     curtains and the show. A press stops both sounds. If either clip fails to load, the title shows
     `background2.png` with its message.
+20. **Every change to what the game does comes with a test that fails without it**, and a test of existing
+    behaviour is updated to match, not deleted. Before, the rules asked only that `uv run pytest` pass.

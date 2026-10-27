@@ -54,6 +54,8 @@ not `uv` or `pyproject.toml`. Reaching the Pi and deploying to it: [docs/raspber
 - **A fake is passed in as a parameter**, never swapped in by replacing a module: `Game(hardware, clock, rng,
   audio)`. Screens read the time from `self.game.now()` and pick through `self.game.prizes`.
 - **`uv run pytest` passes before every commit.**
+- **Every change to what the game does comes with a test that fails without the change**; a test of existing
+  behaviour is updated to match, not deleted.
 - **The Pi's password never goes in the repo.** Agents reach the Pi by SSH key.
 - **Docs change in the same commit as the code they describe.** `plan/`, when it exists, holds only what is
   not built yet; a plan's items move into `docs/` or this file as they are built, and the plan is deleted.

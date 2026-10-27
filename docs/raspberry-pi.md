@@ -24,7 +24,7 @@ To find it when the name does not answer: `dns-sd -B _workstation._tcp local.` l
 | pygame | 2.6.1 from the Debian package `python3-pygame` (SDL 2.32.4) |
 | Video decoding | PyAV 14.2.0 (`python3-av`) and numpy 2.2.4 (`python3-numpy`), both already installed; `pyproject.toml` pins the same versions for the Mac |
 | Memory | 4 GB, 3.3 GB free with the game running (2026-10-26) |
-| Idle clips' cost | The five clips in `assets/idle/` (360 frames, 12 s) load in about 12 s at startup, and the game then holds 1.66 GB, leaving 1.87 GB available. Decoding alone runs at about 70 frames a second (measured on a 960x960 clip), against the 30 the clips play at (2026-10-26) |
+| Idle video's cost | The curtain clip and the show in `assets/idle/` (420 frames: 60 + 360) decode once at startup. The game then holds 1.94 GB, leaving 1.59 GB available (2026-10-26, branch `title-show-v2`). Decoding alone runs at about 70 frames a second (measured on a 960x960 clip), against the 30 the video plays at |
 | Processor use | One core at 31% with the loop capped at 30 frames a second; 105% before the cap (2026-10-26, from `top`) |
 | Restarting the game over SSH | `XAUTHORITY=/home/pi/.Xauthority WAYLAND_DISPLAY=wayland-0 XDG_RUNTIME_DIR=/run/user/1000 setsid nohup ./launch.sh > ~/game.log 2>&1 < /dev/null &` from the repo folder starts it on the display; the SSH command does not return by itself afterwards, and stopping it leaves the game running |
 | Repo folder | `/home/pi/Documents/halloween-prize-game` |
