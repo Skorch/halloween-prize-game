@@ -64,17 +64,14 @@ class VisualConfig:
     TEXT_BG_1 = (0, 0, 0)               # Primary text background (black)
 
     # Title Screen Background
-    IDLE_VIDEO_FILES = [                # Clips the title screen plays in this order, with no text; None = use the image below
-        "assets/idle/automaton-1.mp4",  # curtains open
-        "assets/idle/automaton-2.mp4",
-        "assets/idle/automaton-3.mp4",
-        "assets/idle/automaton-4.mp4",
-        "assets/idle/automaton-5.mp4",  # curtains close
-    ]
-    IDLE_VIDEO_HOLD_BEFORE = 5          # Seconds the first frame stays up before the clips play
-    IDLE_VIDEO_HOLD_AFTER = 5           # Seconds the last frame stays up after them, before it all starts over
-    IDLE_SOUND_FILE = "sounds/idle_crackle.mp3"  # Loops the whole time the title screen is up, holds included; None = silent
+    # The title screen repeats the curtain clip for IDLE_WAIT_SECONDS, plays the show once, then starts over, with no text
+    IDLE_CURTAIN_FILE = "assets/idle/idle-curtains-2s.mp4"  # 2 s of closed curtains with the red lamp pulsing once a second
+    IDLE_SHOW_FILE = "assets/idle/main-animation.mp4"       # the 12 s show: curtains open, the automaton plays, curtains close
+    IDLE_WAIT_SECONDS = 10              # Seconds of curtains between shows; a whole number keeps the lamp in step with the show
+    IDLE_SOUND_FILE = "sounds/crackle-loop.wav"  # Loops the whole time the title screen is up, curtains and show alike; None = silent
     IDLE_SOUND_VOLUME = 0.50            # 0.0 to 1.0
+    IDLE_SHOW_SOUND_FILE = "sounds/show-soundtrack.wav"  # Plays with each show, over the crackle; None = the show is silent
+    IDLE_SHOW_SOUND_VOLUME = 0.50       # 0.0 to 1.0; the same as the crackle matches the mix the video was approved with
     TITLE_BACKGROUND_FILE = "assets/backgrounds/background2.png"  # Shown with the title message when there is no video, or it fails to load
 
     # Text Background Configuration (for candy picker screen)

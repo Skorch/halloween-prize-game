@@ -22,7 +22,8 @@ RGB_COUNT = GAME.RGB_COUNT
 
 class Game():
     def __init__(self, hardware, clock=time, rng=None, audio=None, fullscreen=GAME.FULLSCREEN,
-                 idle_video_files=VISUAL.IDLE_VIDEO_FILES, idle_sound_file=VISUAL.IDLE_SOUND_FILE) -> None:
+                 idle_video_files=(VISUAL.IDLE_CURTAIN_FILE, VISUAL.IDLE_SHOW_FILE),
+                 idle_sound_file=VISUAL.IDLE_SOUND_FILE, show_sound_file=VISUAL.IDLE_SHOW_SOUND_FILE) -> None:
         """
         Args:
             hardware: the button and LEDs: the pi2 module on the Pi, pi_dev2 on a Mac, a fake in tests
@@ -30,11 +31,13 @@ class Game():
             rng: random source for prize picks; a new random.Random() if None
             audio: loads and plays sounds; PygameAudio() if None
             fullscreen: fill the display, or open a window of the game's size
-            idle_video_files: the clips the title screen plays in order; None shows the still background instead
+            idle_video_files: (curtain clip, show clip) for the title screen; None shows the still background instead
             idle_sound_file: the sound the title screen loops; None leaves it silent
+            show_sound_file: the sound that plays with each show on the title screen; None leaves the show silent
         """
         self.idle_video_files = idle_video_files
         self.idle_sound_file = idle_sound_file
+        self.show_sound_file = show_sound_file
         self.clock = clock
         self.rng = rng if rng is not None else random.Random()
         self.fullscreen = fullscreen
@@ -236,26 +239,32 @@ class Game():
         # Title screen background, loaded once here because the title screen is made again after every round
         title_background = pygame.image.load(VISUAL.TITLE_BACKGROUND_FILE)
         self.title_background = pygame.transform.smoothscale(title_background, self.GAME_DIMENSIONS).convert()
-        # Idle clips: a clip that fails to load is skipped; with none, the title shows the still background
-        clips = []
-        for path in self.idle_video_files or []:
-            try:
-                clips.append(load_clip(path, self.GAME_DIMENSIONS))
-                logger.info(f"Loaded idle clip: {path}, {len(clips[-1].frames)} frames")
-            except Exception as e:
-                logger.error(f"Failed to load idle clip '{path}', skipping it: {e}")
+        # Idle video: the curtain clip and the show; if either fails to load, the title shows the still background
         self.idle_video = None
-        if clips:
-            self.idle_video = IdleVideo(clips, VISUAL.IDLE_VIDEO_HOLD_BEFORE, VISUAL.IDLE_VIDEO_HOLD_AFTER)
-        elif self.idle_video_files:
-            logger.info(f"No idle clip loaded; falling back to the still background: {VISUAL.TITLE_BACKGROUND_FILE}")
-        # Idle sound: the title screen loops it; one that fails to load leaves the title silent
+        if self.idle_video_files:
+            curtain_file, show_file = self.idle_video_files
+            try:
+                curtain = load_clip(curtain_file, self.GAME_DIMENSIONS)
+                show = load_clip(show_file, self.GAME_DIMENSIONS)
+                self.idle_video = IdleVideo(curtain, show, VISUAL.IDLE_WAIT_SECONDS)
+                logger.info(f"Loaded idle video: {len(curtain.frames)} curtain frames, {len(show.frames)} show frames")
+            except Exception as e:
+                logger.error(f"Failed to load the idle video, falling back to the still background "
+                             f"{VISUAL.TITLE_BACKGROUND_FILE}: {e}")
+        # Idle sounds: the title loops the crackle and plays the soundtrack with each show; one that fails to
+        # load is left out
         self.idle_sound = None
         if self.idle_sound_file:
             try:
                 self.idle_sound = self.audio.load(self.idle_sound_file, VISUAL.IDLE_SOUND_VOLUME)
             except Exception as e:
                 logger.error(f"Failed to load idle sound '{self.idle_sound_file}', the title will be silent: {e}")
+        self.show_sound = None
+        if self.show_sound_file:
+            try:
+                self.show_sound = self.audio.load(self.show_sound_file, VISUAL.IDLE_SHOW_SOUND_VOLUME)
+            except Exception as e:
+                logger.error(f"Failed to load show sound '{self.show_sound_file}', the show will be silent: {e}")
 
         # Default font for backward compatibility
         self.font = self.font_small

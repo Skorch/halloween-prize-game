@@ -48,3 +48,13 @@ changes an earlier one says so.
     plays the whole time the title is up, the holds included, on its own 12 s loop rather than in step with the
     clips; a press stops it, and it starts again back at the title. Each clip's own sound, mixed in with it, comes
     later, once a clip has sound.
+19. **The title screen plays a 4:3 curtain loop and one show, with a soundtrack** (changes decisions 15 and 18).
+    The video was re-rendered at 1024x768, the Pi display's size. `assets/idle/idle-curtains-2s.mp4` repeats
+    for `IDLE_WAIT_SECONDS` (10 s), then `assets/idle/main-animation.mp4` (12 s) plays once, and it starts over;
+    they replace the five `automaton-*.mp4` clips and the holds. `sounds/show-soundtrack.wav` starts on the show's
+    first frame, on a mixer channel of its own, at the crackle's volume (0.50), the mix the video was approved
+    with. The crackle is now `sounds/crackle-loop.wav`, cut to loop without a gap, and keeps playing through the
+    curtains and the show. A press stops both sounds. If either clip fails to load, the title shows
+    `background2.png` with its message.
+20. **Every change to what the game does comes with a test that fails without it**, and a test of existing
+    behaviour is updated to match, not deleted. Before, the rules asked only that `uv run pytest` pass.

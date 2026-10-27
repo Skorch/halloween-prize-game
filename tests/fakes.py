@@ -100,6 +100,8 @@ class FakeAudio:
         self.played = []
         self.looping = None       # the sound looping now, or None
         self.loops_started = 0
+        self.show = None          # the show's soundtrack while it plays, or None once stopped
+        self.shows_started = 0
 
     def load(self, path, volume):
         return path
@@ -113,6 +115,14 @@ class FakeAudio:
 
     def stop_loop(self):
         self.looping = None
+
+    def play_show(self, sound):
+        """A sound that ends by itself stays in `show` until stopped: the fake does not know how long it is."""
+        self.show = sound
+        self.shows_started += 1
+
+    def stop_show(self):
+        self.show = None
 
 
 class ScriptedPicks(random.Random):

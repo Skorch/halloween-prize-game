@@ -9,7 +9,8 @@ class Title(State):
         super().__init__(game)
         self.next_led_time = self.game.now() + 1
         self.video_start = self.game.now()
-        # The idle sound loops under the clips and the holds alike, until a press starts a spin
+        self.shows_played = 0   # how many shows this title screen has started the soundtrack for
+        # The idle sound loops under the curtains and the show alike, until a press starts a spin
         if self.game.idle_sound is not None:
             self.game.audio.loop(self.game.idle_sound)
 
@@ -17,11 +18,19 @@ class Title(State):
         if actions["space"] or actions["button"]:
             if self.game.idle_sound is not None:
                 self.game.audio.stop_loop()
+            self.game.audio.stop_show()
             new_state = CandyPicker(self.game)
             new_state.enter_state()
         else:
 
             now = self.game.now()
+            # The soundtrack starts on the frame the show starts: update runs just before render picks that frame
+            if self.game.idle_video is not None:
+                shows = self.game.idle_video.shows_started(now - self.video_start)
+                if shows > self.shows_played:
+                    self.shows_played = shows
+                    if self.game.show_sound is not None:
+                        self.game.audio.play_show(self.game.show_sound)
             dt_led = self.next_led_time - now
             # print(f"candy picker update dt={dt}")
             # logger.debug(f"dt_led: {dt_led}; dt: {dt}")    
