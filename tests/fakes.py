@@ -98,12 +98,21 @@ class FakeAudio:
 
     def __init__(self):
         self.played = []
+        self.looping = None       # the sound looping now, or None
+        self.loops_started = 0
 
     def load(self, path, volume):
         return path
 
     def play(self, sound):
         self.played.append(sound)
+
+    def loop(self, sound):
+        self.looping = sound
+        self.loops_started += 1
+
+    def stop_loop(self):
+        self.looping = None
 
 
 class ScriptedPicks(random.Random):

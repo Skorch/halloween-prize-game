@@ -9,9 +9,14 @@ class Title(State):
         super().__init__(game)
         self.next_led_time = self.game.now() + 1
         self.video_start = self.game.now()
+        # The idle sound loops under the clips and the holds alike, until a press starts a spin
+        if self.game.idle_sound is not None:
+            self.game.audio.loop(self.game.idle_sound)
 
     def update(self, delta_time, actions):
         if actions["space"] or actions["button"]:
+            if self.game.idle_sound is not None:
+                self.game.audio.stop_loop()
             new_state = CandyPicker(self.game)
             new_state.enter_state()
         else:

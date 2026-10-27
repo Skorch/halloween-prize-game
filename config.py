@@ -73,6 +73,8 @@ class VisualConfig:
     ]
     IDLE_VIDEO_HOLD_BEFORE = 5          # Seconds the first frame stays up before the clips play
     IDLE_VIDEO_HOLD_AFTER = 5           # Seconds the last frame stays up after them, before it all starts over
+    IDLE_SOUND_FILE = "sounds/idle_crackle.mp3"  # Loops the whole time the title screen is up, holds included; None = silent
+    IDLE_SOUND_VOLUME = 0.50            # 0.0 to 1.0
     TITLE_BACKGROUND_FILE = "assets/backgrounds/background2.png"  # Shown with the title message when there is no video, or it fails to load
 
     # Text Background Configuration (for candy picker screen)

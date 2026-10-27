@@ -44,3 +44,7 @@ changes an earlier one says so.
     past about 15 to 20 s in total.
 17. **The game loop draws at most `GAME.MAX_FPS` (30) frames a second**; before, it drew as fast as it could
     and kept one processor core busy.
+18. **The title screen loops a crackle**, `sounds/idle_crackle.mp3` (changes the "no sound" in decision 11). It
+    plays the whole time the title is up, the holds included, on its own 12 s loop rather than in step with the
+    clips; a press stops it, and it starts again back at the title. Each clip's own sound, mixed in with it, comes
+    later, once a clip has sound.

@@ -22,7 +22,7 @@ RGB_COUNT = GAME.RGB_COUNT
 
 class Game():
     def __init__(self, hardware, clock=time, rng=None, audio=None, fullscreen=GAME.FULLSCREEN,
-                 idle_video_files=VISUAL.IDLE_VIDEO_FILES) -> None:
+                 idle_video_files=VISUAL.IDLE_VIDEO_FILES, idle_sound_file=VISUAL.IDLE_SOUND_FILE) -> None:
         """
         Args:
             hardware: the button and LEDs: the pi2 module on the Pi, pi_dev2 on a Mac, a fake in tests
@@ -31,8 +31,10 @@ class Game():
             audio: loads and plays sounds; PygameAudio() if None
             fullscreen: fill the display, or open a window of the game's size
             idle_video_files: the clips the title screen plays in order; None shows the still background instead
+            idle_sound_file: the sound the title screen loops; None leaves it silent
         """
         self.idle_video_files = idle_video_files
+        self.idle_sound_file = idle_sound_file
         self.clock = clock
         self.rng = rng if rng is not None else random.Random()
         self.fullscreen = fullscreen
@@ -237,6 +239,13 @@ class Game():
             self.idle_video = IdleVideo(clips, VISUAL.IDLE_VIDEO_HOLD_BEFORE, VISUAL.IDLE_VIDEO_HOLD_AFTER)
         elif self.idle_video_files:
             logger.info(f"No idle clip loaded; falling back to the still background: {VISUAL.TITLE_BACKGROUND_FILE}")
+        # Idle sound: the title screen loops it; one that fails to load leaves the title silent
+        self.idle_sound = None
+        if self.idle_sound_file:
+            try:
+                self.idle_sound = self.audio.load(self.idle_sound_file, VISUAL.IDLE_SOUND_VOLUME)
+            except Exception as e:
+                logger.error(f"Failed to load idle sound '{self.idle_sound_file}', the title will be silent: {e}")
 
         # Default font for backward compatibility
         self.font = self.font_small
