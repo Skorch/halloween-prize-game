@@ -14,26 +14,26 @@ class Clip:
 
 
 class IdleVideo:
-    """The title screen's clips in order: it holds the first frame for hold_before seconds, plays each clip,
-    holds the last frame for hold_after seconds, then starts over."""
+    """The title screen's video: the curtain clip repeats for `wait` seconds, the show plays once, then it
+    starts over."""
 
-    def __init__(self, clips, hold_before, hold_after):
-        self.clips = clips
-        self.hold_before = hold_before
-        self.hold_after = hold_after
-        self.duration = hold_before + sum(clip.duration for clip in clips) + hold_after
+    def __init__(self, curtain, show, wait):
+        self.curtain = curtain
+        self.show = show
+        self.wait = wait
+        self.duration = wait + show.duration
 
     def frame_at(self, seconds):
         """The frame to show `seconds` after the title screen started."""
         seconds = seconds % self.duration
-        if seconds < self.hold_before:
-            return self.clips[0].frames[0]
-        seconds -= self.hold_before
-        for clip in self.clips:
-            if seconds < clip.duration:
-                return clip.frame_at(seconds)
-            seconds -= clip.duration
-        return self.clips[-1].frames[-1]
+        if seconds < self.wait:
+            return self.curtain.frame_at(seconds % self.curtain.duration)
+        return self.show.frame_at(seconds - self.wait)
+
+    def shows_started(self, seconds):
+        """How many times the show has started by `seconds` after the title screen started: 0 during the first
+        wait, 1 from the first show's first frame, and so on."""
+        return int((seconds + self.show.duration) // self.duration)
 
 
 def load_clip(path, size):

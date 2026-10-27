@@ -15,6 +15,7 @@ def test_each_prize_category_has_its_sound_and_cards(name):
 
 
 @pytest.mark.parametrize("path", [PRIZES.BEEP_SOUND_FILE, VISUAL.FONT_TTF_PATH, VISUAL.TITLE_BACKGROUND_FILE,
-                                  *VISUAL.IDLE_VIDEO_FILES])
+                                  VISUAL.IDLE_CURTAIN_FILE, VISUAL.IDLE_SHOW_FILE, VISUAL.IDLE_SOUND_FILE,
+                                  VISUAL.IDLE_SHOW_SOUND_FILE])
 def test_each_named_file_exists(path):
     assert Path(path).is_file()
