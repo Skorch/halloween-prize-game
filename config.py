@@ -43,7 +43,7 @@ class GameConfig:
     GAME_HEIGHT = 1024                   # Game canvas height
     FULLSCREEN = True                   # Run in fullscreen mode
     FULLSCREEN_MODE = (1000, 666)       # Fullscreen size asked of the display; it picks the nearest mode (1024x768 on the Pi)
-    SCREEN_SCALE = 0.91                 # Picture's share of the display's width and height, centred; the rest is a black mat. 0.91 takes about 2 cm off the width of a 10.1" screen
+    SCREEN_SCALE = 0.91                 # Picture's share of the display's width and height, centred left to right and against the top edge; the rest is a black mat. 0.91 takes about 2 cm off the width of a 10.1" screen
     MAX_FPS = 30                        # Frames drawn per second at most; the idle clips play at 30
 
     # Game Mechanics

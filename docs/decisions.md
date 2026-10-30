@@ -66,3 +66,6 @@ changes an earlier one says so.
 22. **The picture sits in a black mat** (Drew, 2026-10-30): shrunk proportionally so the screen loses about 2 cm
     of width, and the same share of height. `config.GAME.SCREEN_SCALE` sets the picture's share of the display;
     `render()` fills the display black and scales the canvas into the middle.
+23. **The picture sits against the top edge** (Drew, 2026-10-30; changes decision 22): Drew's frame around the
+    screen needs it top aligned. It stays centred left to right, so the mat runs down both sides and along the
+    bottom.

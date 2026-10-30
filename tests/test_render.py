@@ -1,5 +1,5 @@
-"""Each frame reaches the display once, scaled to GAME.SCREEN_SCALE of the display's size inside a black mat, and
-drawing a frame loads nothing."""
+"""Each frame reaches the display once, scaled to GAME.SCREEN_SCALE of the display's size against its top edge, in a
+black mat, and drawing a frame loads nothing."""
 import random
 
 import pygame
@@ -17,10 +17,11 @@ def fullscreen_game(clock):
 
 
 def matted(canvas, size):
-    """What the display should show: black, with the canvas scaled to GAME.SCREEN_SCALE of size in the middle."""
+    """What the display should show: black, with the canvas scaled to GAME.SCREEN_SCALE of size, centred left to right
+    and against the top edge."""
     w, h = size
     picture = pygame.Rect(0, 0, round(w * GAME.SCREEN_SCALE), round(h * GAME.SCREEN_SCALE))
-    picture.center = (w // 2, h // 2)
+    picture.midtop = (w // 2, 0)
     frame = pygame.Surface(size)
     frame.fill((0, 0, 0))
     frame.blit(pygame.transform.scale(canvas, picture.size), picture)
@@ -59,12 +60,12 @@ def test_the_mat_is_black_and_the_picture_keeps_the_display_shape():
     g.step()
     w, h = g.SCREEN_DIMENSIONS
     side = (w - round(w * GAME.SCREEN_SCALE)) // 2
-    top = (h - round(h * GAME.SCREEN_SCALE)) // 2
+    bottom = h - round(h * GAME.SCREEN_SCALE)
 
     assert GAME.SCREEN_SCALE < 1
-    assert g.screen.get_at((side - 1, h // 2))[:3] == (0, 0, 0)   # left edge of the mat
-    assert g.screen.get_at((w // 2, top - 1))[:3] == (0, 0, 0)    # top edge of the mat
-    assert abs(side / w - top / h) < 0.01                         # the same share off the width and the height
+    assert g.screen.get_at((side - 1, h // 2))[:3] == (0, 0, 0)    # left edge of the mat
+    assert g.screen.get_at((w // 2, h - bottom))[:3] == (0, 0, 0)  # bottom edge of the mat
+    assert abs(2 * side / w - bottom / h) < 0.01                   # the same share off the width and the height
     pygame.quit()
 
 
