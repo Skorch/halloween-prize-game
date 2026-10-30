@@ -227,10 +227,11 @@ class LightsConfig:
     MAX_BRIGHTNESS = 0.4                # No scene goes brighter than this share of full (power and glare)
 
     # A scene is one effect from lights.py and how it looks: its colours, speed (1.0 = the effect's normal pace)
-    # and brightness (0.0 to MAX_BRIGHTNESS). Effects: flicker, heartbeat, pulse, wave, chase
+    # and brightness (0.0 to MAX_BRIGHTNESS). Effects: flicker, heartbeat, flash, pulse, wave, chase
     SCENES = {
-        "fire":    {"effect": "flicker",   "colors": [(255, 70, 0), (160, 15, 0)], "speed": 1.0, "brightness": 0.35},
+        "fire":    {"effect": "flicker",   "colors": [(255, 90, 0), (150, 10, 0)], "speed": 1.5, "brightness": 0.35},
         "dread":   {"effect": "heartbeat", "colors": [(200, 0, 0)],                "speed": 1.0, "brightness": 0.3},
+        "panic":   {"effect": "flash",     "colors": [(200, 0, 0)],                "speed": 1.0, "brightness": 0.3},
         "ember":   {"effect": "pulse",     "colors": [(255, 90, 0)],               "speed": 0.5, "brightness": 0.3},
         "toxic":   {"effect": "wave",      "colors": [(120, 255, 0), (0, 60, 0)],  "speed": 0.6, "brightness": 0.3},
         "jackpot": {"effect": "chase",     "colors": [(255, 0, 0), (255, 120, 0), (120, 255, 0), (150, 0, 255)],
@@ -238,9 +239,12 @@ class LightsConfig:
     }
 
     TITLE = "fire"                      # The title screen's scene
-    SPIN = "dread"                      # The spin's scene: it speeds up with the cards, and brightens to MAX_BRIGHTNESS
-                                        # as the countdown runs down
-    SPIN_FASTEST_SPEED = 3.0            # The spin scene's speed is multiplied by this once the cards are at their fastest
+    # The spin's scenes start again on every beep, and one round of their effect lasts until the next card, so the
+    # strip thumps in time with the cards (their speed is not used). Both brighten to MAX_BRIGHTNESS as the countdown
+    # runs down
+    SPIN = "dread"                      # While the cards are slow: a double thump on each beep
+    SPIN_FAST = "panic"                 # Once a card lasts less than SPIN_FAST_SECONDS: one flash on each beep
+    SPIN_FAST_SECONDS = 0.4             # Below this, a second thump would last under 2 frames and could not show
     WINNER = {                          # The winner screen's scene, by the prize won
         "mini": "ember",
         "playdough": "toxic",

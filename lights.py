@@ -31,27 +31,36 @@ def dim(colour, amount):
 # random numbers, so the same t always gives the same colours.
 
 def flicker(t, n, colors):
-    """Each LED drifts between the two colours and dims and brightens, at its own uneven pace, like firelight."""
+    """Each LED flares toward the first colour and drops nearly dark in the second, at its own uneven pace, like
+    flames."""
     out = []
     for i in range(n):
-        # Three waves at rates that never line up, and a different start for each LED: -1.0 to 1.0
-        wobble = (math.sin(t * 7.0 + i * 1.7) + math.sin(t * 11.3 + i * 2.9) + math.sin(t * 3.1 + i * 0.6)) / 3
+        # Four waves at rates that never line up, and a different start for each LED: -1.0 to 1.0
+        wobble = (math.sin(t * 7.0 + i * 1.7) + math.sin(t * 11.3 + i * 2.9) + math.sin(t * 3.1 + i * 0.6)
+                  + math.sin(t * 23.7 + i * 4.1)) / 4
         amount = (wobble + 1) / 2
-        out.append(dim(mix(colors[-1], colors[0], amount), 0.5 + 0.5 * amount))
+        # Squaring keeps the LED low most of the time, with short bright flares: contrast, not a steady glow
+        out.append(dim(mix(colors[-1], colors[0], amount), 0.06 + 0.94 * amount ** 2))
     return out
 
 
 def heartbeat(t, n, colors):
-    """All LEDs thump twice, then rest at a faint glow: one beat a second."""
+    """All LEDs thump twice, then rest at a faint glow: one beat a second. Each thump starts at full and fades, so a
+    beat started on a beep is brightest on it."""
     beat = t % 1.0
-    if beat < 0.15:
-        level = math.sin(math.pi * beat / 0.15)
-    elif 0.25 <= beat < 0.4:
-        level = 0.7 * math.sin(math.pi * (beat - 0.25) / 0.15)
+    if beat < 0.2:
+        level = 1 - beat / 0.2
+    elif 0.3 <= beat < 0.5:
+        level = 0.6 * (1 - (beat - 0.3) / 0.2)
     else:
         level = 0.0
-    level = max(level, 0.08)
-    return [dim(colors[0], level)] * n
+    return [dim(colors[0], max(level, 0.08))] * n
+
+
+def flash(t, n, colors):
+    """All LEDs flash at full, then fade to a faint glow: one flash a second."""
+    level = 1 - (t % 1.0) / 0.6
+    return [dim(colors[0], max(level, 0.08))] * n
 
 
 def pulse(t, n, colors):
@@ -76,6 +85,7 @@ def chase(t, n, colors):
 EFFECTS = {
     "flicker": flicker,
     "heartbeat": heartbeat,
+    "flash": flash,
     "pulse": pulse,
     "wave": wave,
     "chase": chase,
@@ -85,35 +95,43 @@ EFFECTS = {
 class Lights:
     """The scene the strip shows now.
 
-    pace (0.0 to 1.0) speeds the scene up, to LIGHTS.SPIN_FASTEST_SPEED times its speed at 1.0; boost (0.0 to 1.0)
-    lifts its brightness up to LIGHTS.MAX_BRIGHTNESS. The spin sets both every frame; show() puts them back to 0.
+    boost (0.0 to 1.0) lifts the scene's brightness up to LIGHTS.MAX_BRIGHTNESS; the spin sets it every frame, and
+    show() puts it back to 0.
     """
 
     def __init__(self):
         self.scene_name = None
         self.scene = None
-        self.pace = 0
         self.boost = 0
         self.effect_time = 0.0
         self.last_time = 0.0
+        self.round_seconds = None   # set by beat(): one round of the effect lasts this long, in place of its speed
 
     def show(self, scene_name, now):
         """Start a scene from its beginning."""
         self.scene_name = scene_name
         self.scene = LIGHTS.SCENES[scene_name]
-        self.pace = 0
         self.boost = 0
         self.effect_time = 0.0
         self.last_time = now
+        self.round_seconds = None
+
+    def beat(self, scene_name, now, seconds):
+        """Start a scene from its beginning now, with one round of its effect lasting `seconds`. The spin calls this
+        on every beep, so the strip thumps in time with the cards. Unlike show(), it keeps boost."""
+        self.scene_name = scene_name
+        self.scene = LIGHTS.SCENES[scene_name]
+        self.effect_time = 0.0
+        self.last_time = now
+        self.round_seconds = seconds
 
     def colours(self, now):
         """The strip's colours at `now`, as whole numbers. Call once a frame: it moves the effect's clock on."""
         if self.scene is None:
             return [DARK] * LIGHTS.NUM_LEDS
 
-        # The effect's clock runs at the scene's speed, sped up by pace. Adding up each frame's share keeps the beat
-        # smooth while pace changes; multiplying the whole time by a new speed would jump the beat
-        speed = self.scene["speed"] * (1 + (LIGHTS.SPIN_FASTEST_SPEED - 1) * self.pace)
+        # The effect's clock runs at the scene's speed, or, after beat(), one round in round_seconds
+        speed = 1.0 / self.round_seconds if self.round_seconds else self.scene["speed"]
         self.effect_time += max(0.0, now - self.last_time) * speed
         self.last_time = now
 

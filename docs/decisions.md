@@ -84,3 +84,9 @@ changes an earlier one says so.
 26. **The strip is wired with no level shifter**, Drew having none; a diode in its 5 V wire is the first fix if it
     flickers.
 27. **Dev mode shows every LED** as a dot in the black mat under the picture, so scenes can be tuned on a Mac.
+28. **The spin's strip thumps on every beep** (changes the spin in decision 24): each beep starts a thump, brightest on
+    the beep, lasting until the next card. Slow cards get a double thump; cards under `LIGHTS.SPIN_FAST_SECONDS`
+    (0.4 s) get one flash, because a double at that speed got in the way of the frames. The heartbeat no longer speeds
+    up on its own clock.
+29. **The title's fire flickers harder and faster**: flares to orange and drops nearly dark between them, about five
+    flares a second, in place of a slow glow.

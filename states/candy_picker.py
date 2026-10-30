@@ -18,7 +18,6 @@ class CandyPicker(State):
         self.current_prize = None
         self.current_tick = 0
         self.current_rgb_index = 0
-        self.game.lights.show(LIGHTS.SPIN, self.game.now())
 
         # Timer initialization
         if VISUAL.TIMER_ENABLED:
@@ -61,7 +60,7 @@ class CandyPicker(State):
                     print(f"[TIMER] Visible: {self.timer_remaining:.1f}s remaining")
                 logger.debug(f"Timer visible: {self.timer_remaining:.1f}s remaining")
 
-        self.set_light_pace()
+        self.set_light_boost()
 
         if actions["space"] or actions["button"] or timer_expired:
             # self.stop_sound()
@@ -176,9 +175,8 @@ class CandyPicker(State):
             self.game.draw_text( surface, prize_text, text_color, self.game.GAME_W/2, self.game.GAME_H*7/8, fill_rect=fill_rect, fill_position=fill_position, fill_color=fill_color, fill_alpha=fill_alpha)            
 
     
-    def set_light_pace(self):
-        """The strip's heartbeat speeds up with the cards, and brightens as the countdown runs down."""
-        self.game.lights.pace = min(1.0, (self.current_tick - 1) / (len(STEP_RATE_CURVE) - 1))
+    def set_light_boost(self):
+        """The strip brightens as the countdown runs down."""
         if self.timer_remaining is not None and self.timer_remaining <= VISUAL.TIMER_SHOW_AT_SECONDS:
             self.game.lights.boost = 1 - self.timer_remaining / VISUAL.TIMER_SHOW_AT_SECONDS
 
@@ -215,6 +213,15 @@ class CandyPicker(State):
     def play_beep(self):
         beep = self.game.prizes.sounds["beep"]
         self.game.play_sound(beep)
+        self.beat_lights()
+
+    def beat_lights(self):
+        """The strip thumps on every beep, for as long as this card shows: twice while the cards are slow, one flash
+        once a card lasts less than LIGHTS.SPIN_FAST_SECONDS."""
+        now = self.game.now()
+        seconds = self.next_image_time - now
+        scene = LIGHTS.SPIN if seconds >= LIGHTS.SPIN_FAST_SECONDS else LIGHTS.SPIN_FAST
+        self.game.lights.beat(scene, now, seconds)
 
     #cycle through a sequence of 4 turning each LED on with a spooky green RGB color
     

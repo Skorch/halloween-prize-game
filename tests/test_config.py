@@ -27,7 +27,7 @@ def test_each_named_file_exists(path):
 
 
 def test_each_scene_the_screens_name_is_in_scenes():
-    named = [LIGHTS.TITLE, LIGHTS.SPIN, *LIGHTS.WINNER.values()]
+    named = [LIGHTS.TITLE, LIGHTS.SPIN, LIGHTS.SPIN_FAST, *LIGHTS.WINNER.values()]
 
     assert [name for name in named if name not in LIGHTS.SCENES] == []
 

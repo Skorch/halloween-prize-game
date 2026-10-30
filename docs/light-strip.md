@@ -8,15 +8,16 @@ Facts below are from 2026-10-30.
 
 | Screen | Scene (`config.py`) | What it looks like |
 |---|---|---|
-| Title | `LIGHTS.TITLE`, `fire` | Each LED drifts between orange and deep red and dims and brightens, like firelight |
-| Spin | `LIGHTS.SPIN`, `dread` | A red heartbeat. It beats faster as the cards speed up, up to `SPIN_FASTEST_SPEED` (3) times as fast, and brightens to `MAX_BRIGHTNESS` as the countdown runs down |
+| Title | `LIGHTS.TITLE`, `fire` | Each LED flares orange and drops nearly dark in deep red, about five flares a second, each LED at its own pace, like flames |
+| Spin | `LIGHTS.SPIN`, `dread`, then `LIGHTS.SPIN_FAST`, `panic` | A red thump on every beep, brightest on the beep's own frame. While a card lasts `SPIN_FAST_SECONDS` (0.4 s) or more, a double thump (`dread`); on quicker cards, one flash (`panic`), since a second thump would last under 2 frames. Brightens to `MAX_BRIGHTNESS` as the countdown runs down |
 | Winner | `LIGHTS.WINNER`, by the prize won | `mini`: `ember`, an orange swell. `playdough`: `toxic`, a green band travelling along the strip. `big_prize`: `jackpot`, red, orange, green and purple racing along it |
 
 A scene is one effect plus its colours, speed and brightness, so a new scene is a few lines of `config.py`. A new
 kind of movement is a new function in `lights.py`, added to `EFFECTS`. No scene goes past `MAX_BRIGHTNESS` (0.4).
 
-The spin sets `game.lights.pace` from how far through `STEP_RATE_CURVE` the cards are, and `game.lights.boost` from
-the countdown once it shows (`states/candy_picker.py`, `set_light_pace`).
+On every beep the spin calls `game.lights.beat(scene, now, seconds)`, which starts the scene from its beginning with
+one round of its effect lasting until the next card (`states/candy_picker.py`, `beat_lights`); the spin scenes'
+`speed` is not used. Every frame it sets `game.lights.boost` from the countdown once it shows (`set_light_boost`).
 
 ## The hardware
 
