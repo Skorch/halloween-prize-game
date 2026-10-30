@@ -230,3 +230,15 @@ def test_outputs_stay_hidden_without_show_outputs(make_game, clock):
 
     for centre in game.output_dot_centres(shown.get_size()):
         assert shown.get_at(centre)[:3] == DARK
+
+
+def test_the_playdough_wave_crosses_the_strip_twice_while_the_winner_shows():
+    """The band reaches the last LED, at its brightest, within half the winner screen's RESET_DELAY."""
+    from states.winner import RESET_DELAY
+
+    lights = Lights()
+    lights.show(LIGHTS.WINNER["playdough"], 0.0)
+    last = [max(lights.colours(i / 30)[-1]) for i in range(round(RESET_DELAY * 30))]
+    reached = last.index(max(last)) / 30
+
+    assert reached <= RESET_DELAY / 2

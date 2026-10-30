@@ -60,6 +60,7 @@ class Game():
         # Fullscreen asks for GAME.FULLSCREEN_MODE and takes the size the display gives back
         if self.fullscreen:
             self.screen = pygame.display.set_mode(GAME.FULLSCREEN_MODE, pygame.FULLSCREEN)
+            pygame.mouse.set_visible(False)   # no pointer over the picture; a window on a Mac keeps it
         else:
             self.screen = pygame.display.set_mode(self.GAME_DIMENSIONS)
         self.SCREEN_WIDTH, self.SCREEN_HEIGHT = self.screen.get_size()

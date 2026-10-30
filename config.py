@@ -233,7 +233,7 @@ class LightsConfig:
         "dread":   {"effect": "heartbeat", "colors": [(200, 0, 0)],                "speed": 1.0, "brightness": 0.3},
         "panic":   {"effect": "flash",     "colors": [(200, 0, 0)],                "speed": 1.0, "brightness": 0.3},
         "ember":   {"effect": "pulse",     "colors": [(255, 90, 0)],               "speed": 0.5, "brightness": 0.3},
-        "toxic":   {"effect": "wave",      "colors": [(120, 255, 0), (0, 60, 0)],  "speed": 0.6, "brightness": 0.3},
+        "toxic":   {"effect": "wave",      "colors": [(120, 255, 0), (0, 60, 0)],  "speed": 1.5, "brightness": 0.3},
         "jackpot": {"effect": "chase",     "colors": [(255, 0, 0), (255, 120, 0), (120, 255, 0), (150, 0, 255)],
                     "speed": 2.0, "brightness": 0.4},
     }

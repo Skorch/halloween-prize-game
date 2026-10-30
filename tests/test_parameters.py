@@ -50,3 +50,20 @@ def test_fullscreen_scales_to_the_size_the_display_gives():
     assert g.screen.get_flags() & pygame.FULLSCREEN
     assert g.SCREEN_DIMENSIONS == g.screen.get_size()
     pygame.quit()
+
+
+def test_fullscreen_hides_the_mouse_pointer():
+    """On the Pi the pointer sat over the picture; a window on a Mac keeps it."""
+    import game
+    import pygame
+
+    game.Game(hardware=FakeHardware(), clock=FakeClock(), rng=random.Random(1), audio=FakeAudio(),
+              fullscreen=True, idle_video_files=None)
+    hidden = not pygame.mouse.get_visible()
+    pygame.quit()
+    game.Game(hardware=FakeHardware(), clock=FakeClock(), rng=random.Random(1), audio=FakeAudio(),
+              fullscreen=False, idle_video_files=None)
+    shown = pygame.mouse.get_visible()
+    pygame.quit()
+
+    assert hidden and shown

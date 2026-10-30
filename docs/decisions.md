@@ -90,3 +90,6 @@ changes an earlier one says so.
     up on its own clock.
 29. **The title's fire flickers harder and faster**: flares to orange and drops nearly dark between them, about five
     flares a second, in place of a slow glow.
+30. **Fullscreen hides the mouse pointer**, which sat over the picture on the Pi; a window on a Mac keeps it.
+31. **The playdough wave runs faster** (speed 0.6 to 1.5): at 0.6 the band took 6.7 s to cross the strip, longer than the
+    5 s winner screen; now it crosses in 2.7 s.
