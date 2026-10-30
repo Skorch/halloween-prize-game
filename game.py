@@ -164,7 +164,12 @@ class Game():
         # The display surface pygame shows now: on the Pi, the window events at startup make pygame swap it for a
         # new one, so the one set_mode gave cannot be kept. Scaling straight into it makes no new surface each frame
         screen = pygame.display.get_surface()
-        pygame.transform.scale(self.game_canvas, screen.get_size(), screen)
+        # The picture fills GAME.SCREEN_SCALE of the screen's width and height, in the middle, inside a black mat
+        w, h = screen.get_size()
+        picture = pygame.Rect(0, 0, round(w * GAME.SCREEN_SCALE), round(h * GAME.SCREEN_SCALE))
+        picture.center = (w // 2, h // 2)
+        screen.fill((0, 0, 0))
+        pygame.transform.scale(self.game_canvas, picture.size, screen.subsurface(picture))
         pygame.display.flip()   # once: display.update() with no arguments would send the same frame again
 
     def get_dt(self):

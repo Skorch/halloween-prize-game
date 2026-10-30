@@ -63,3 +63,6 @@ changes an earlier one says so.
     `display.flip()`; the countdown's font loads in `load_assets`. On the Pi the title screen went from 30% to
     17% of one core. Turning the LEDs off on every frame of the winner screen stays as it is, until LED strip
     work replaces it.
+22. **The picture sits in a black mat** (Drew, 2026-10-30): shrunk proportionally so the screen loses about 2 cm
+    of width, and the same share of height. `config.GAME.SCREEN_SCALE` sets the picture's share of the display;
+    `render()` fills the display black and scales the canvas into the middle.
