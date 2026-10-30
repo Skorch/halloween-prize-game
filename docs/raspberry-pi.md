@@ -29,7 +29,7 @@ To find it when the name does not answer: `dns-sd -B _workstation._tcp local.` l
 | Restarting the game over SSH | `XAUTHORITY=/home/pi/.Xauthority WAYLAND_DISPLAY=wayland-0 XDG_RUNTIME_DIR=/run/user/1000 setsid nohup ./launch.sh > ~/game.log 2>&1 < /dev/null &` from the repo folder starts it on the display; the SSH command does not return by itself afterwards, and stopping it leaves the game running |
 | Repo folder | `/home/pi/Documents/halloween-prize-game` |
 | Started by | `launch.sh`, from the desktop session: the game's output goes to `~/.xsession-errors`. What starts `launch.sh` at boot is not known: no systemd service names the game and `pi`'s crontab is empty |
-| Display | HDMI, "TXD Display"; it prefers 1280x800. The game asks for 1000x666 fullscreen (`config.GAME.FULLSCREEN_MODE`) and gets 1024x768, as `~/.xsession-errors` shows: `Display: 1024x768, Game canvas: 1024x1024, Screen: 1024x768` |
+| Display | HDMI, "TXD Display"; it prefers 1280x800. The game asks for 1000x666 fullscreen (`config.GAME.FULLSCREEN_MODE`) and gets 1024x768, as `~/.xsession-errors` shows: `Display: 1024x768, Game canvas: 1024x1024, Screen: 1024x768`. The window events at startup make pygame swap the display surface for a new one (2026-10-26), so `render()` draws onto `pygame.display.get_surface()` each frame, not onto the surface `set_mode` returned |
 
 `/home/pi/Documents/halloween-prize-game-backup-20251030-181252` is an old copy whose git history is
 damaged (`fatal: bad object HEAD`). Nothing in it is newer than the repo folder.

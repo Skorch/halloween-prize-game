@@ -27,6 +27,20 @@ def test_the_screen_shows_the_canvas_scaled_to_the_display():
     pygame.quit()
 
 
+def test_a_frame_draws_onto_the_display_surface_pygame_has_now(make_game):
+    """On the Pi, the window events at startup make pygame swap the display surface for a new one (2026-10-26,
+    measured: the old one's size read (0, 0), then garbage). The game must draw onto the one pygame shows now,
+    at its size, not onto the one set_mode gave."""
+    game = make_game()
+    game.step()
+    shown = pygame.display.set_mode((800, 600))   # the display surface changes under the game
+
+    game.step()
+
+    expected = pygame.transform.scale(game.game_canvas, (800, 600))
+    assert pygame.image.tobytes(shown, "RGB") == pygame.image.tobytes(expected, "RGB")
+
+
 def test_each_frame_reaches_the_display_once(make_game, monkeypatch):
     game = make_game()
     presents = []

@@ -161,8 +161,10 @@ class Game():
         # print("render")
         self.state_stack[-1].render(self.game_canvas)
 
-        # Scales straight into the screen, so no new screen-sized surface is made and copied each frame
-        pygame.transform.scale(self.game_canvas, self.SCREEN_DIMENSIONS, self.screen)
+        # The display surface pygame shows now: on the Pi, the window events at startup make pygame swap it for a
+        # new one, so the one set_mode gave cannot be kept. Scaling straight into it makes no new surface each frame
+        screen = pygame.display.get_surface()
+        pygame.transform.scale(self.game_canvas, screen.get_size(), screen)
         pygame.display.flip()   # once: display.update() with no arguments would send the same frame again
 
     def get_dt(self):
