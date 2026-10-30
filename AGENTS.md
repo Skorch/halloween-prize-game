@@ -28,6 +28,7 @@ The task starts once each note and skill it touches is in your context.
 | `lights.py` | The light strip behind the screen: its five effects, `Lights` (the scene showing now), and `strip_bytes`, which turns colours into the SPI bytes the strip reads ([docs/light-strip.md](docs/light-strip.md)) |
 | `pi2.py`, `buttonhandler.py`, `pi_sound.py` | Real GPIO on the Pi (button, LEDs, and the light strip over SPI through `spidev`) through `RPi.GPIO` from `rpi-lgpio` |
 | `pi_dev2.py` | Fake GPIO: logs LED changes, ignores the light strip; the spacebar stands in for the button |
+| `curtain_demo.py` | A test, run by hand, of the green-screen curtain clips in `assets/curtain/` drawn over a title show, such as `assets/idle/main-animation-no-curtain.mp4`; the game does not import it |
 | `picker.py`, `pi.py`, `pi_dev.py` | The first version of the game; only each other import them, and nothing the game runs imports any of them |
 | `tests/` | The scripted test suite and its fakes ([docs/testing.md](docs/testing.md)) |
 | `assets/`, `sounds/` | Prize card images, backgrounds, the font, and sound effects |
