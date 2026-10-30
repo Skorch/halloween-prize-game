@@ -71,6 +71,7 @@ def test_press_stops_on_a_prize(make_game, clock, hardware, audio, snap):
     snap(game, "spinning")
 
     press_space(game)
+    wait(game, clock, PRIZES.WIN_SOUND_DELAY + SMALL)
 
     assert screen(game) == "Winner"
     assert game.state_stack[-1].prize["type"] == "big_prize"

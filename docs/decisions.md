@@ -100,3 +100,8 @@ changes an earlier one says so.
 33. **With every prize gone, the title says "Out of candy!"** and the button does nothing until a count goes up.
 34. **The win sounds play at 1.0, twice the 0.50 they had** (`PRIZES.PRIZE_SOUND_VOLUME`); the beep keeps 0.50
     (`PRIZES.BEEP_SOUND_VOLUME`). 1.0 is the most pygame plays a sound at.
+35. **The beep plays on a channel of its own** (`audio.BEEP_CHANNEL`), so each card's beep cuts off the one before.
+    The 1.48 s organ chord piled up once cards came faster than it, filled pygame's channels, and beeps dropped out
+    of time. The winner screen stops the beep at once and plays the prize sound after `PRIZES.WIN_SOUND_DELAY`
+    (0.5 s); `PRIZES.STOP_SOUND_FILE` can open that gap with a sound, and is `None` (silent) for now. The strip's prize
+    scene still starts as the winner screen opens.

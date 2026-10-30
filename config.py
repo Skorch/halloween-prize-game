@@ -210,6 +210,8 @@ class PrizesConfig:
     STOCK_FILE = "stock.yaml"           # Prizes left, kept on the Pi (not in git); the numbers above start it when it is missing
     BEEP_SOUND_FILE = "sounds/picker-organ-chord-v6.wav"  # the whoomp (picker-whoomp-v6.wav) is 93% bass, which the speaker cannot play
     BEEP_SOUND_VOLUME = 0.50            # 0.0 to 1.0
+    WIN_SOUND_DELAY = 0.5               # Seconds of gap between the beep stopping and the prize sound, on the winner screen
+    STOP_SOUND_FILE = None              # A sound for the start of that gap, such as a button's clunk; None = a silent gap
     PRIZE_SOUND_VOLUME = 1.0            # 0.0 to 1.0; the win sounds, 2x the 0.50 they had (Drew, 2026-10-30). 1.0 is the
                                         # most pygame plays a sound at; louder needs the files themselves made louder
 

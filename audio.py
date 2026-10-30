@@ -2,6 +2,7 @@ import pygame
 
 LOOP_CHANNEL = 0   # kept for the looping sound: no other sound plays there, so starting the loop cuts none off
 SHOW_CHANNEL = 1   # kept for the title show's soundtrack: no prize sound takes it, and a press can stop it
+BEEP_CHANNEL = 2   # kept for the spin's beep: each beep cuts off the one before, so fast cards never run out of channels
 
 
 class PygameAudio:
@@ -9,7 +10,7 @@ class PygameAudio:
 
     def __init__(self):
         pygame.mixer.init()
-        pygame.mixer.set_reserved(2)   # Sound.play() skips reserved channels: channels 0 and 1 are kept for the title
+        pygame.mixer.set_reserved(3)   # Sound.play() skips reserved channels: 0 and 1 are kept for the title, 2 for the beep
 
     def load(self, path, volume):
         sound = pygame.mixer.Sound(path)
@@ -33,3 +34,10 @@ class PygameAudio:
 
     def stop_show(self):
         pygame.mixer.Channel(SHOW_CHANNEL).stop()
+
+    def play_beep(self, sound):
+        """Plays `sound` on the beep's own channel, cutting off the beep still playing there."""
+        pygame.mixer.Channel(BEEP_CHANNEL).play(sound)
+
+    def stop_beep(self):
+        pygame.mixer.Channel(BEEP_CHANNEL).stop()

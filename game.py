@@ -25,7 +25,7 @@ class Game():
     def __init__(self, hardware, clock=time, rng=None, audio=None, fullscreen=GAME.FULLSCREEN,
                  idle_video_files=(VISUAL.IDLE_CURTAIN_FILE, VISUAL.IDLE_SHOW_FILE),
                  idle_sound_file=VISUAL.IDLE_SOUND_FILE, show_sound_file=VISUAL.IDLE_SHOW_SOUND_FILE,
-                 show_outputs=False, stock_file=None) -> None:
+                 show_outputs=False, stock_file=None, stop_sound_file=PRIZES.STOP_SOUND_FILE) -> None:
         """
         Args:
             hardware: the button and LEDs: the pi2 module on the Pi, pi_dev2 on a Mac, a fake in tests
@@ -39,10 +39,12 @@ class Game():
             show_outputs: draw what the game last sent each LED as dots in the black mat under the picture, to see
                 the lights on a Mac; dev mode turns it on
             stock_file: the YAML file that keeps the prizes left (stock.py); None keeps the stock in memory only
+            stop_sound_file: the sound that plays as the winner screen opens, before the prize sound; None = silence
         """
         self.idle_video_files = idle_video_files
         self.idle_sound_file = idle_sound_file
         self.show_sound_file = show_sound_file
+        self.stop_sound_file = stop_sound_file
         self.clock = clock
         self.rng = rng if rng is not None else random.Random()
         self.fullscreen = fullscreen
@@ -312,6 +314,12 @@ class Game():
                 self.show_sound = self.audio.load(self.show_sound_file, VISUAL.IDLE_SHOW_SOUND_VOLUME)
             except Exception as e:
                 logger.error(f"Failed to load show sound '{self.show_sound_file}', the show will be silent: {e}")
+        self.stop_sound = None
+        if self.stop_sound_file:
+            try:
+                self.stop_sound = self.audio.load(self.stop_sound_file, PRIZES.PRIZE_SOUND_VOLUME)
+            except Exception as e:
+                logger.error(f"Failed to load stop sound '{self.stop_sound_file}', the gap will be silent: {e}")
 
         # Default font for backward compatibility
         self.font = self.font_small

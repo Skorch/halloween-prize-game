@@ -212,7 +212,7 @@ class CandyPicker(State):
         
     def play_beep(self):
         beep = self.game.prizes.sounds["beep"]
-        self.game.play_sound(beep)
+        self.game.audio.play_beep(beep)
         self.beat_lights()
 
     def beat_lights(self):

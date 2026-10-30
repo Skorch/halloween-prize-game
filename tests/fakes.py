@@ -107,6 +107,7 @@ class FakeAudio:
         self.loops_started = 0
         self.show = None          # the show's soundtrack while it plays, or None once stopped
         self.shows_started = 0
+        self.beep = None          # the beep on its own channel, or None once stopped
 
     def load(self, path, volume):
         self.volumes[path] = volume
@@ -129,6 +130,14 @@ class FakeAudio:
 
     def stop_show(self):
         self.show = None
+
+    def play_beep(self, sound):
+        """A new beep cuts off the one before; it also counts in `played`, like any sound."""
+        self.played.append(sound)
+        self.beep = sound
+
+    def stop_beep(self):
+        self.beep = None
 
 
 class ScriptedPicks(random.Random):
