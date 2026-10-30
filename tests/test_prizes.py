@@ -38,3 +38,14 @@ def test_a_prize_never_shows_the_same_card_twice_in_a_row():
         card = prizes.pick(tick, previous)["filename"]
         assert card != previous
         previous = card
+
+
+def test_prize_sounds_play_at_twice_the_beep_volume():
+    """Drew, 2026-10-30: the prize sounds needed to be 2x louder. 1.0 is the most pygame plays a sound at."""
+    audio = FakeAudio()
+    Prizes(audio, random.Random(1))
+
+    for category in PRIZES.PRIZE_CATEGORIES.values():
+        if category["sound_file"] in audio.volumes:
+            assert audio.volumes[category["sound_file"]] == 1.0
+    assert audio.volumes[PRIZES.BEEP_SOUND_FILE] == 0.5

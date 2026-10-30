@@ -98,3 +98,5 @@ changes an earlier one says so.
     from the next spin with no restart. Drew restocks by asking an agent, which sets the number over SSH. YAML, because
     the Pi already has `python3-yaml`. Starting stock on 2026-10-30: mini candy 200, playdough 42, full-size 48.
 33. **With every prize gone, the title says "Out of candy!"** and the button does nothing until a count goes up.
+34. **The win sounds play at 1.0, twice the 0.50 they had** (`PRIZES.PRIZE_SOUND_VOLUME`); the beep keeps 0.50
+    (`PRIZES.BEEP_SOUND_VOLUME`). 1.0 is the most pygame plays a sound at.

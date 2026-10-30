@@ -102,12 +102,14 @@ class FakeAudio:
 
     def __init__(self):
         self.played = []
+        self.volumes = {}         # each loaded file's volume
         self.looping = None       # the sound looping now, or None
         self.loops_started = 0
         self.show = None          # the show's soundtrack while it plays, or None once stopped
         self.shows_started = 0
 
     def load(self, path, volume):
+        self.volumes[path] = volume
         return path
 
     def play(self, sound):

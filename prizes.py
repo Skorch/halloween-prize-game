@@ -43,7 +43,7 @@ class Prizes:
         self._add(audio, "playdough", "playdough", PRIZES.PLAYDOUGH_INVENTORY)
         # Big prize uses the configured type: skull or full_size
         self._add(audio, "big_prize", PRIZES.BIG_PRIZE_TYPE, PRIZES.BIG_PRIZE_INVENTORY)
-        self.sounds["beep"] = audio.load(PRIZES.BEEP_SOUND_FILE, PRIZES.DEFAULT_SOUND_VOLUME)
+        self.sounds["beep"] = audio.load(PRIZES.BEEP_SOUND_FILE, PRIZES.BEEP_SOUND_VOLUME)
 
         self.refresh()
 
@@ -68,7 +68,7 @@ class Prizes:
     def _add(self, audio, key, category_name, stock):
         category = PRIZES.PRIZE_CATEGORIES[category_name]
         self.titles[key] = category["title"]
-        self.sounds[key] = audio.load(category["sound_file"], PRIZES.DEFAULT_SOUND_VOLUME)
+        self.sounds[key] = audio.load(category["sound_file"], PRIZES.PRIZE_SOUND_VOLUME)
         self.assets[key] = glob.glob(category["folder"])
         self.inventory[key] = stock
 
