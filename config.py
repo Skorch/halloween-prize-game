@@ -127,6 +127,10 @@ class MessagesConfig:
     # Candy Picker Screen (prize text while spinning)
     PICKER_MESSAGE_FONT_SIZE = VisualConfig.FONT_SIZE_LARGE
 
+    # Title Screen, once every prize is gone (stock.yaml all 0); the button does nothing until it is restocked
+    OUT_OF_STOCK_MESSAGE = "Out of candy!"
+    OUT_OF_STOCK_MESSAGE_FONT_SIZE = VisualConfig.FONT_SIZE_XLARGE
+
     # Winner Screen
     # Use {prize} as a placeholder for the prize name
     WINNER_MESSAGE = "{prize}!"
@@ -143,11 +147,12 @@ class PrizesConfig:
     """Prize categories, inventory, and probability settings"""
 
     # =============================================================================
-    # PRIZE INVENTORY - Set how many of each prize you have this year
+    # PRIZE INVENTORY - How many of each prize you start with. These start stock.yaml when it is missing; after that,
+    # the game counts down in stock.yaml, and a restock means changing the numbers there (docs/prize-stock.md)
     # =============================================================================
-    MINI_CANDY_INVENTORY = 80          # How many mini candies you have
-    PLAYDOUGH_INVENTORY = 50            # How many playdough prizes (set to 0 if none)
-    BIG_PRIZE_INVENTORY = 20            # How many big prizes you have
+    MINI_CANDY_INVENTORY = 200         # How many mini candies you have
+    PLAYDOUGH_INVENTORY = 42            # How many playdough prizes (set to 0 if none)
+    BIG_PRIZE_INVENTORY = 48            # How many big prizes you have
 
     # =============================================================================
     # BIG PRIZE TYPE - What is your "big prize" this year?
@@ -202,7 +207,8 @@ class PrizesConfig:
     # =============================================================================
     # OTHER PRIZE SETTINGS
     # =============================================================================
-    BEEP_SOUND_FILE = "sounds/prize-game-sound-2.wav"
+    STOCK_FILE = "stock.yaml"           # Prizes left, kept on the Pi (not in git); the numbers above start it when it is missing
+    BEEP_SOUND_FILE = "sounds/picker-whoomp-v6.wav"
     DEFAULT_SOUND_VOLUME = 0.50
 
 

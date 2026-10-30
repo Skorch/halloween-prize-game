@@ -10,7 +10,7 @@ from lights import DARK, Lights
 from prizes import Prizes
 from states.title import Title
 from video import IdleVideo, load_clip
-from config import GAME, HW, LIGHTS, VISUAL, MESSAGES
+from config import GAME, HW, LIGHTS, PRIZES, VISUAL, MESSAGES
 
 BUTTONS_SPACE = "space"
 BUTTONS_BUTTON = "button"
@@ -25,7 +25,7 @@ class Game():
     def __init__(self, hardware, clock=time, rng=None, audio=None, fullscreen=GAME.FULLSCREEN,
                  idle_video_files=(VISUAL.IDLE_CURTAIN_FILE, VISUAL.IDLE_SHOW_FILE),
                  idle_sound_file=VISUAL.IDLE_SOUND_FILE, show_sound_file=VISUAL.IDLE_SHOW_SOUND_FILE,
-                 show_outputs=False) -> None:
+                 show_outputs=False, stock_file=None) -> None:
         """
         Args:
             hardware: the button and LEDs: the pi2 module on the Pi, pi_dev2 on a Mac, a fake in tests
@@ -38,6 +38,7 @@ class Game():
             show_sound_file: the sound that plays with each show on the title screen; None leaves the show silent
             show_outputs: draw what the game last sent each LED as dots in the black mat under the picture, to see
                 the lights on a Mac; dev mode turns it on
+            stock_file: the YAML file that keeps the prizes left (stock.py); None keeps the stock in memory only
         """
         self.idle_video_files = idle_video_files
         self.idle_sound_file = idle_sound_file
@@ -48,7 +49,7 @@ class Game():
         self.show_outputs = show_outputs
         pygame.init()
         self.audio = audio if audio is not None else PygameAudio()
-        self.prizes = Prizes(self.audio, self.rng)
+        self.prizes = Prizes(self.audio, self.rng, stock_file)
         self.image_cache = {}
         display_info = pygame.display.Info()
 
@@ -395,7 +396,8 @@ def main():
         import pi2 as hardware
         print("prod")
 
-    g = Game(hardware, fullscreen=GAME.FULLSCREEN and not dev_mode, show_outputs=dev_mode)
+    g = Game(hardware, fullscreen=GAME.FULLSCREEN and not dev_mode, show_outputs=dev_mode,
+             stock_file=PRIZES.STOCK_FILE)
     print("starting")
     while g.running:
         g.game_loop()

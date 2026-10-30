@@ -93,3 +93,8 @@ changes an earlier one says so.
 30. **Fullscreen hides the mouse pointer**, which sat over the picture on the Pi; a window on a Mac keeps it.
 31. **The playdough wave runs faster** (speed 0.6 to 1.5): at 0.6 the band took 6.7 s to cross the strip, longer than the
     5 s winner screen; now it crosses in 2.7 s.
+32. **The stock goes down, and lives in `stock.yaml` on the Pi** (fixes the bug in decision 9). The game reads it at
+    the start of every spin and takes one off each win, so the odds follow what is left; a number changed in it counts
+    from the next spin with no restart. Drew restocks by asking an agent, which sets the number over SSH. YAML, because
+    the Pi already has `python3-yaml`. Starting stock on 2026-10-30: mini candy 200, playdough 42, full-size 48.
+33. **With every prize gone, the title says "Out of candy!"** and the button does nothing until a count goes up.

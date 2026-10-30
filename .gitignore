@@ -135,3 +135,6 @@ dmypy.json
 *.DS_Store
 # Screens saved by the tests
 tests/out/
+# The Pi's count of prizes left (stock.py); the game writes it
+stock.yaml
+stock.yaml.tmp

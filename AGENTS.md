@@ -20,8 +20,9 @@ The task starts once each note and skill it touches is in your context.
 |---|---|
 | `game.py` | The `Game` class: the loop, input, drawing helpers. It takes its hardware, clock, random source and sound as parameters; `main()` picks the real ones |
 | `states/` | One class per screen: `title.py` → `candy_picker.py` (spinning) → `winner.py` → back to title |
-| `config.py` | Every setting a person tunes: pins, prize stock, odds, text, timer, sounds, the title video, its looping crackle, the show's soundtrack, the screen's black mat (`GAME.SCREEN_SCALE`), and the light strip's scenes (`LIGHTS`) |
+| `config.py` | Every setting a person tunes: pins, starting prize stock, odds, text, timer, sounds, the title video, its looping crackle, the show's soundtrack, the screen's black mat (`GAME.SCREEN_SCALE`), and the light strip's scenes (`LIGHTS`) |
 | `prizes.py` | The prizes for one game: titles, sounds, cards, stock, odds, and the pick |
+| `stock.py` | Reads and writes `stock.yaml`, the prizes left, which the game counts down and a person can restock while it runs ([docs/prize-stock.md](docs/prize-stock.md)) |
 | `audio.py` | `PygameAudio`, which loads and plays sounds through `pygame.mixer`, loops one sound on a mixer channel kept for it, and plays the title show's soundtrack on a second kept channel |
 | `video.py` | `load_clip`, which decodes one of the title screen's two clips (the curtains and the show) once through PyAV (`av`) into a list of frames, and `IdleVideo`, which picks the frame to show from the time and counts the shows started |
 | `lights.py` | The light strip behind the screen: its five effects, `Lights` (the scene showing now), and `strip_bytes`, which turns colours into the SPI bytes the strip reads ([docs/light-strip.md](docs/light-strip.md)) |

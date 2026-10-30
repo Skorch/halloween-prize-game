@@ -19,6 +19,7 @@ in a scratch environment with pytest added), before the clips were added.
 | `idle_video_files` | `(VISUAL.IDLE_CURTAIN_FILE, VISUAL.IDLE_SHOW_FILE)` | `None`, unless the test passes a pair | `None` shows the still background. Decoding the 12 s show takes seconds, so most video and sound tests pass the 2 s curtain clip as both clips; only `test_title_shows_the_curtains_then_the_show_then_the_curtains` and `test_game_runs_a_frame_on_fakes` decode the real show |
 | `idle_sound_file` | `VISUAL.IDLE_SOUND_FILE` | the same, unless the test passes `None` | `FakeAudio` loads it as its file name, so the title's loop shows in `looping` |
 | `show_outputs` | `False` (`True` in dev mode) | `False`, unless the test passes `True` | draws every LED as a dot in the mat; `game.output_dot_centres(size)` says where |
+| `stock_file` | `PRIZES.STOCK_FILE` | `None` (stock in memory only), unless the test passes a file in `tmp_path` | `tests/test_stock.py` writes and reads the file to set and check the stock |
 | `show_sound_file` | `VISUAL.IDLE_SHOW_SOUND_FILE` | the same, unless the test passes `None` | `FakeAudio` records it in `show` and counts it in `shows_started` each time a show begins |
 
 `tests/conftest.py` sets SDL's `dummy` video and audio drivers before pygame starts, and moves into the repo

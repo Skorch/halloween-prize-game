@@ -1,6 +1,7 @@
 import glob
 from asyncio.log import logger
 
+import stock
 from config import PRIZES
 
 
@@ -24,23 +25,45 @@ def calculate_probabilities(inventory):
 
 
 class Prizes:
-    """The prizes for one game: titles, sounds, images, stock and odds, built from PRIZES config."""
+    """The prizes for one game: titles, sounds, images, stock and odds, built from PRIZES config.
 
-    def __init__(self, audio, rng):
+    stock_file: the YAML file that keeps the stock (stock.py); None keeps it in memory only, from PRIZES config
+    """
+
+    def __init__(self, audio, rng, stock_file=None):
         self.rng = rng
+        self.stock_file = stock_file
         self.titles = {}
         self.sounds = {}
         self.assets = {}
         self.inventory = {}
 
+        # Every prize stays in the game at 0, so it can be restocked
         self._add(audio, "mini", "mini", PRIZES.MINI_CANDY_INVENTORY)
-        if PRIZES.PLAYDOUGH_INVENTORY > 0:
-            self._add(audio, "playdough", "playdough", PRIZES.PLAYDOUGH_INVENTORY)
+        self._add(audio, "playdough", "playdough", PRIZES.PLAYDOUGH_INVENTORY)
         # Big prize uses the configured type: skull or full_size
         self._add(audio, "big_prize", PRIZES.BIG_PRIZE_TYPE, PRIZES.BIG_PRIZE_INVENTORY)
         self.sounds["beep"] = audio.load(PRIZES.BEEP_SOUND_FILE, PRIZES.DEFAULT_SOUND_VOLUME)
 
+        self.refresh()
+
+    def refresh(self):
+        """Read the stock file again, so a number set by hand counts, and work the odds out from it."""
+        if self.stock_file:
+            self.inventory = stock.read(self.stock_file, self.inventory)
         self.probability = calculate_probabilities(self.inventory)
+
+    def out_of_stock(self):
+        return sum(self.inventory.values()) == 0
+
+    def take(self, prize_type):
+        """One `prize_type` was won: take it off the stock, and off the file."""
+        self.refresh()   # read first, so a number set by hand during the spin is kept
+        self.inventory[prize_type] = max(0, self.inventory[prize_type] - 1)
+        if self.stock_file:
+            stock.write(self.stock_file, self.inventory)
+        self.probability = calculate_probabilities(self.inventory)
+        logger.info(f"Won {prize_type}; stock now {self.inventory}")
 
     def _add(self, audio, key, category_name, stock):
         category = PRIZES.PRIZE_CATEGORIES[category_name]
@@ -52,11 +75,12 @@ class Prizes:
     def pick(self, current_tick, prev_filename):
         """Pick a prize based on configured probabilities and inventory"""
 
-        # Filter out big_prize if minimum spins not reached
-        prize_types = list(filter(
-            lambda prize: prize != 'big_prize' or current_tick >= PRIZES.MIN_SPINS_FOR_BIG_PRIZE,
-            self.probability.keys()
-        ))
+        # Only prizes in stock, and no big_prize before the minimum spins, unless big prizes are all that is left
+        in_stock = [prize for prize in self.probability if self.inventory[prize] > 0]
+        prize_types = [prize for prize in in_stock
+                       if prize != 'big_prize' or current_tick >= PRIZES.MIN_SPINS_FOR_BIG_PRIZE]
+        if not prize_types:
+            prize_types = in_stock
 
         # Get weights for filtered prize types
         weights = [self.probability[prize] for prize in prize_types]

@@ -1,5 +1,4 @@
 """Whole rounds of the game on fake hardware and a fake clock: title, spin, winner, back to title."""
-import pytest
 
 import pi_dev2
 from config import HW, PRIZES, VISUAL
@@ -139,7 +138,6 @@ def test_a_full_round_with_the_keyboard_hardware(make_game, clock):
     assert screen(game) == "Title"
 
 
-@pytest.mark.xfail(strict=True, reason="Known bug: stock is set once and never goes down (docs/decisions.md)")
 def test_stock_goes_down_when_a_prize_is_won(make_game, clock):
     picks = ["mini"] * 5 + ["big_prize"] + ["mini"] * 20
     game = make_game(rng=ScriptedPicks(picks))

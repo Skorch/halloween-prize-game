@@ -12,6 +12,7 @@ class Winner(State):
         self.win_time = self.game.now()
         self.has_rendered = False
         self.game.lights.show(LIGHTS.WINNER[prize["type"]], self.win_time)   # the strip's scene is the prize's
+        self.game.prizes.take(prize["type"])
 
 
 

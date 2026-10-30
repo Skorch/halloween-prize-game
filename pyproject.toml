@@ -9,6 +9,7 @@ dependencies = [
     "numpy==2.2.4",
     "pygame",
     # GPIO on the Pi only; it does not build on a Mac.
+    "pyyaml==6.0.2",
     "rpi-lgpio; sys_platform == 'linux'",
 ]
 
