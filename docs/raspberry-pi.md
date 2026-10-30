@@ -22,6 +22,7 @@ To find it when the name does not answer: `dns-sd -B _workstation._tcp local.` l
 | Operating system | Debian GNU/Linux 13 (trixie) |
 | Python | 3.13.5, `/usr/bin/python3` |
 | pygame | 2.6.1 from the Debian package `python3-pygame` (SDL 2.32.4) |
+| SPI | Needed by the light strip ([light-strip.md](light-strip.md)): `dtparam=spi=on` in `/boot/firmware/config.txt` gives `/dev/spidev0.0`. On 2026-10-30 the line was still commented out and only `/dev/spidev10.0` existed. `python3-spidev` 3.6 is installed, and `pi` is in the `spi` group |
 | Video decoding | PyAV 14.2.0 (`python3-av`) and numpy 2.2.4 (`python3-numpy`), both already installed; `pyproject.toml` pins the same versions for the Mac |
 | Memory | 4 GB, 3.3 GB free with the game running (2026-10-26) |
 | Idle video's cost | The curtain clip and the show in `assets/idle/` (420 frames: 60 + 360) decode once at startup. The game then holds 1.94 GB, leaving 1.59 GB available (2026-10-26, branch `title-show-v2`). Decoding alone runs at about 70 frames a second (measured on a 960x960 clip), against the 30 the video plays at |
@@ -47,7 +48,8 @@ When the Pi holds commits or edits of its own, carry them to the Mac first: comm
 `git pull --ff-only <bundle> main` in the Mac's clone. The commit keeps its id, so the Pi matches GitHub after
 the push.
 
-Pins for the button and LEDs are set in `config.py` (`HardwareConfig`).
+Pins for the button and LEDs are set in `config.py` (`HardwareConfig`). The light strip's wiring is in
+[light-strip.md](light-strip.md).
 
 ## The button
 

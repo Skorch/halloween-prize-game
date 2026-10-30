@@ -6,7 +6,8 @@ import pi_sound
 
 import logging
 from buttonhandler import ButtonHandler
-from config import HW
+from config import HW, LIGHTS
+from lights import strip_bytes
 
 logger = logging.getLogger()
 
@@ -23,6 +24,7 @@ RGB_LED_PINS = HW.RGB_LED_PINS
 NUM_RGB_LEDS = HW.NUM_RGB_LEDS
 
 button_event = None
+strip_spi = None        # the light strip's SPI connection; None while it is not open, and the strip stays dark
 
 def gpio_setup(button_press):
 
@@ -42,6 +44,35 @@ def gpio_setup(button_press):
         logging.info(f"Set up RGB LED on GPIO pin {pin}")
 
     GPIO.add_event_detect(BUTTON_PIN, GPIO.BOTH, callback=button_press)
+    strip_setup()
+
+
+def strip_setup():
+    """Open the light strip's SPI connection. If it will not open, log why once: the game plays on, strip dark."""
+    global strip_spi
+    try:
+        import spidev
+        spi = spidev.SpiDev()
+        spi.open(HW.STRIP_SPI_BUS, HW.STRIP_SPI_DEVICE)
+        spi.max_speed_hz = HW.STRIP_SPI_HZ
+        spi.mode = 0
+        strip_spi = spi
+        logging.info(f"Light strip on /dev/spidev{HW.STRIP_SPI_BUS}.{HW.STRIP_SPI_DEVICE} at {HW.STRIP_SPI_HZ} Hz")
+    except Exception as e:
+        logging.error(f"Light strip off: could not open /dev/spidev{HW.STRIP_SPI_BUS}.{HW.STRIP_SPI_DEVICE} "
+                      f"(is dtparam=spi=on set in /boot/firmware/config.txt?): {e}")
+
+
+def set_strip(colours):
+    """Send one (r, g, b) for each LED to the light strip."""
+    global strip_spi
+    if strip_spi is None:
+        return
+    try:
+        strip_spi.writebytes2(strip_bytes(colours))
+    except Exception as e:
+        logging.error(f"Light strip off: sending to it failed: {e}")
+        strip_spi = None
 
 
 def button_state():
@@ -123,6 +154,8 @@ def play_beep(is_on, current_tick_rate):
 
 def clean():
     logger.info("cleaning GPIO")
+    if strip_spi is not None:
+        strip_spi.close()
     GPIO.cleanup()
 
 
@@ -161,7 +194,29 @@ def test_rgb_leds():
     clear_rgb_leds()
     time.sleep(0.5)
 
+def test_strip():
+    """Light the whole strip red, then green, then blue, then one LED at a time along it, then dark.
+
+    Red, green and blue in that order show the strip reads the colours as the game sends them; the walk shows every
+    LED answers.
+    """
+    level = round(255 * LIGHTS.MAX_BRIGHTNESS)
+    for name, colour in (("red", (level, 0, 0)), ("green", (0, level, 0)), ("blue", (0, 0, level))):
+        print(f"Strip: all {name}")
+        set_strip([colour] * LIGHTS.NUM_LEDS)
+        time.sleep(1.5)
+    for i in range(LIGHTS.NUM_LEDS):
+        print(f"Strip: LED {i + 1} of {LIGHTS.NUM_LEDS}")
+        colours = [(0, 0, 0)] * LIGHTS.NUM_LEDS
+        colours[i] = (level, level, level)
+        set_strip(colours)
+        time.sleep(0.3)
+    print("Strip: dark")
+    set_strip([(0, 0, 0)] * LIGHTS.NUM_LEDS)
+
 if __name__ == "__main__":
     print("testing gpio")
     gpio_setup(press)
-    test_rgb_leds()        
+    test_rgb_leds()
+    test_strip()
+    clean()        

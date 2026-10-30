@@ -1,7 +1,7 @@
 from states.state import State
 import pygame
 from colors import *
-from config import MESSAGES, VISUAL
+from config import LIGHTS, MESSAGES, VISUAL
 
 RESET_DELAY = 5
 
@@ -11,6 +11,7 @@ class Winner(State):
         self.prize = prize
         self.win_time = self.game.now()
         self.has_rendered = False
+        self.game.lights.show(LIGHTS.WINNER[prize["type"]], self.win_time)   # the strip's scene is the prize's
 
 
 

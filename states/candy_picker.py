@@ -2,7 +2,7 @@ import pygame, math
 from states.state import State
 from states.winner import Winner
 from colors import *
-from config import MESSAGES, VISUAL
+from config import LIGHTS, MESSAGES, VISUAL
 from asyncio.log import logger
 
 # Game timing and LED settings
@@ -18,6 +18,7 @@ class CandyPicker(State):
         self.current_prize = None
         self.current_tick = 0
         self.current_rgb_index = 0
+        self.game.lights.show(LIGHTS.SPIN, self.game.now())
 
         # Timer initialization
         if VISUAL.TIMER_ENABLED:
@@ -59,6 +60,8 @@ class CandyPicker(State):
                     self._last_printed_second = int(self.timer_remaining)
                     print(f"[TIMER] Visible: {self.timer_remaining:.1f}s remaining")
                 logger.debug(f"Timer visible: {self.timer_remaining:.1f}s remaining")
+
+        self.set_light_pace()
 
         if actions["space"] or actions["button"] or timer_expired:
             # self.stop_sound()
@@ -173,6 +176,12 @@ class CandyPicker(State):
             self.game.draw_text( surface, prize_text, text_color, self.game.GAME_W/2, self.game.GAME_H*7/8, fill_rect=fill_rect, fill_position=fill_position, fill_color=fill_color, fill_alpha=fill_alpha)            
 
     
+    def set_light_pace(self):
+        """The strip's heartbeat speeds up with the cards, and brightens as the countdown runs down."""
+        self.game.lights.pace = min(1.0, (self.current_tick - 1) / (len(STEP_RATE_CURVE) - 1))
+        if self.timer_remaining is not None and self.timer_remaining <= VISUAL.TIMER_SHOW_AT_SECONDS:
+            self.game.lights.boost = 1 - self.timer_remaining / VISUAL.TIMER_SHOW_AT_SECONDS
+
     def pick_prize(self):
         """Pick a prize based on configured probabilities and inventory"""
         prev_filename = self.current_prize["filename"] if self.current_prize else ''

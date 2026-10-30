@@ -8,6 +8,7 @@ there; Drew is the second. `AGENTS.md` and `CLAUDE.md` in this folder are symlin
 |---|---|
 | [raspberry-pi.md](raspberry-pi.md) | The Pi itself: how to reach it, what it runs, how code gets onto it |
 | [testing.md](testing.md) | The scripted test suite: how it runs, its fakes, and how to add a test |
+| [light-strip.md](light-strip.md) | The LED strip behind the screen: its scenes, wiring, and how the Pi sends it colours |
 | [decisions.md](decisions.md) | Each decision Drew made, with its date; appended, never rewritten |
 
 ## Where a new fact goes

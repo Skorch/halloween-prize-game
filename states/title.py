@@ -1,7 +1,7 @@
 from states.state import State
 from states.candy_picker import CandyPicker
 from colors import *
-from config import MESSAGES
+from config import LIGHTS, MESSAGES
 import pygame
 
 class Title(State):
@@ -10,6 +10,7 @@ class Title(State):
         self.next_led_time = self.game.now() + 1
         self.video_start = self.game.now()
         self.shows_played = 0   # how many shows this title screen has started the soundtrack for
+        self.game.lights.show(LIGHTS.TITLE, self.game.now())
         # The idle sound loops under the curtains and the show alike, until a press starts a spin
         if self.game.idle_sound is not None:
             self.game.audio.loop(self.game.idle_sound)

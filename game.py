@@ -6,10 +6,11 @@ from time import time
 import pygame
 
 from audio import PygameAudio
+from lights import DARK, Lights
 from prizes import Prizes
 from states.title import Title
 from video import IdleVideo, load_clip
-from config import GAME, HW, VISUAL, MESSAGES
+from config import GAME, HW, LIGHTS, VISUAL, MESSAGES
 
 BUTTONS_SPACE = "space"
 BUTTONS_BUTTON = "button"
@@ -23,7 +24,8 @@ RGB_COUNT = GAME.RGB_COUNT
 class Game():
     def __init__(self, hardware, clock=time, rng=None, audio=None, fullscreen=GAME.FULLSCREEN,
                  idle_video_files=(VISUAL.IDLE_CURTAIN_FILE, VISUAL.IDLE_SHOW_FILE),
-                 idle_sound_file=VISUAL.IDLE_SOUND_FILE, show_sound_file=VISUAL.IDLE_SHOW_SOUND_FILE) -> None:
+                 idle_sound_file=VISUAL.IDLE_SOUND_FILE, show_sound_file=VISUAL.IDLE_SHOW_SOUND_FILE,
+                 show_outputs=False) -> None:
         """
         Args:
             hardware: the button and LEDs: the pi2 module on the Pi, pi_dev2 on a Mac, a fake in tests
@@ -34,6 +36,8 @@ class Game():
             idle_video_files: (curtain clip, show clip) for the title screen; None shows the still background instead
             idle_sound_file: the sound the title screen loops; None leaves it silent
             show_sound_file: the sound that plays with each show on the title screen; None leaves the show silent
+            show_outputs: draw what the game last sent each LED as dots in the black mat under the picture, to see
+                the lights on a Mac; dev mode turns it on
         """
         self.idle_video_files = idle_video_files
         self.idle_sound_file = idle_sound_file
@@ -41,6 +45,7 @@ class Game():
         self.clock = clock
         self.rng = rng if rng is not None else random.Random()
         self.fullscreen = fullscreen
+        self.show_outputs = show_outputs
         pygame.init()
         self.audio = audio if audio is not None else PygameAudio()
         self.prizes = Prizes(self.audio, self.rng)
@@ -79,6 +84,11 @@ class Game():
             }
         self.dt = 0
         self.prev_time = 0
+        self.lights = Lights()
+        # What the game last sent each output, for show_outputs. The LED on GPIO 27 starts on, as pi2.py sets it up
+        self.led_lit = True
+        self.cabinet_colours = [DARK] * HW.NUM_RGB_LEDS
+        self.strip_colours = [DARK] * LIGHTS.NUM_LEDS
         self.state_stack = []
         self.load_assets()
         self.load_states()
@@ -87,6 +97,7 @@ class Game():
         return self.clock()
 
     def quit_game(self):
+        self.set_strip([DARK] * LIGHTS.NUM_LEDS)
         self.hardware.clean()
         
     def button_press(self, ev):
@@ -122,10 +133,11 @@ class Game():
             frame_limiter.tick(GAME.MAX_FPS)   # sleeps out the rest of the frame, so the Pi is not drawing flat out
 
     def step(self):
-        """One frame: time, events, update, draw."""
+        """One frame: time, events, update, the light strip, draw."""
         self.get_dt()
         self.get_events()
         self.update()
+        self.set_strip(self.lights.colours(self.now()))
         self.render()
 
     def get_events(self) -> None:
@@ -171,7 +183,32 @@ class Game():
         picture.midtop = (w // 2, 0)
         screen.fill((0, 0, 0))
         pygame.transform.scale(self.game_canvas, picture.size, screen.subsurface(picture))
+        if self.show_outputs:
+            self.draw_outputs(screen)
         pygame.display.flip()   # once: display.update() with no arguments would send the same frame again
+
+    def output_dot_centres(self, size):
+        """Where show_outputs draws each output, in the mat under the picture on a display of `size`: the strip's
+        LEDs, a gap, the cabinet LEDs, a gap, the LED on GPIO 27."""
+        w, h = size
+        mat_top = round(h * GAME.SCREEN_SCALE)
+        y = (mat_top + h) // 2
+        slots = list(range(LIGHTS.NUM_LEDS))                                  # the strip
+        slots += [LIGHTS.NUM_LEDS + 1 + i for i in range(HW.NUM_RGB_LEDS)]    # a gap, then the cabinet LEDs
+        slots.append(slots[-1] + 2)                                           # a gap, then the LED on GPIO 27
+        slot_width = w / (slots[-1] + 2)
+        return [(round(slot_width * (slot + 1)), y) for slot in slots]
+
+    def draw_outputs(self, screen):
+        size = screen.get_size()
+        radius = max(2, min(round(size[0] / 70), round(size[1] * (1 - GAME.SCREEN_SCALE) / 3)))
+        # The strip never goes past LIGHTS.MAX_BRIGHTNESS, which looks dull on a screen; shown at full brightness,
+        # the colours read as the real LEDs look
+        strip = [tuple(min(255, round(c / LIGHTS.MAX_BRIGHTNESS)) for c in colour) for colour in self.strip_colours]
+        led = [(255, 255, 255) if self.led_lit else DARK]
+        for centre, colour in zip(self.output_dot_centres(size), strip + self.cabinet_colours + led):
+            pygame.draw.circle(screen, colour, centre, radius)
+            pygame.draw.circle(screen, (90, 90, 90), centre, radius, 1)   # an outline, so a dark LED still shows
 
     def get_dt(self):
         # print("get_dt")
@@ -317,22 +354,31 @@ class Game():
         
     def toggle_led(self):
         # logger.debug("led on")
+        self.led_lit = not self.led_lit
         self.hardware.toggle_led()
     def led_on(self):
         # logger.debug("led on")
+        self.led_lit = True
         self.hardware.led_on()
 
     def led_off(self):
         # logger.debug("led off")
+        self.led_lit = False
         self.hardware.led_off()
 
     def set_rgb_leds(self, colors):
         # logger.debug("set rgb leds")
+        self.cabinet_colours = list(colors)
         self.hardware.set_rgb_leds(colors)
     
     def clear_rgb_leds(self):
         # logger.debug("clear rgb leds")
+        self.cabinet_colours = [DARK] * HW.NUM_RGB_LEDS
         self.hardware.clear_rgb_leds()
+
+    def set_strip(self, colours):
+        self.strip_colours = colours
+        self.hardware.set_strip(colours)
         
 def main():
     """Main entry point for the Halloween Prize Game"""
@@ -348,7 +394,7 @@ def main():
         import pi2 as hardware
         print("prod")
 
-    g = Game(hardware, fullscreen=GAME.FULLSCREEN and not dev_mode)
+    g = Game(hardware, fullscreen=GAME.FULLSCREEN and not dev_mode, show_outputs=dev_mode)
     print("starting")
     while g.running:
         g.game_loop()

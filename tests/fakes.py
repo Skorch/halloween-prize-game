@@ -36,6 +36,7 @@ class FakeHardware:
 
     def __init__(self):
         self.calls = []
+        self.strip = []          # every frame's strip colours, kept apart from calls: there is one each frame
         self.pin_high = False
         self.on_button_edge = None
 
@@ -64,6 +65,9 @@ class FakeHardware:
 
     def clear_rgb_leds(self):
         self.calls.append(("clear_rgb_leds",))
+
+    def set_strip(self, colours):
+        self.strip.append([tuple(c) for c in colours])
 
     def clean(self):
         self.calls.append(("clean",))

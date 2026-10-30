@@ -20,12 +20,13 @@ The task starts once each note and skill it touches is in your context.
 |---|---|
 | `game.py` | The `Game` class: the loop, input, drawing helpers. It takes its hardware, clock, random source and sound as parameters; `main()` picks the real ones |
 | `states/` | One class per screen: `title.py` → `candy_picker.py` (spinning) → `winner.py` → back to title |
-| `config.py` | Every setting a person tunes: pins, prize stock, odds, text, timer, sounds, the title video, its looping crackle, the show's soundtrack, and the screen's black mat (`GAME.SCREEN_SCALE`) |
+| `config.py` | Every setting a person tunes: pins, prize stock, odds, text, timer, sounds, the title video, its looping crackle, the show's soundtrack, the screen's black mat (`GAME.SCREEN_SCALE`), and the light strip's scenes (`LIGHTS`) |
 | `prizes.py` | The prizes for one game: titles, sounds, cards, stock, odds, and the pick |
 | `audio.py` | `PygameAudio`, which loads and plays sounds through `pygame.mixer`, loops one sound on a mixer channel kept for it, and plays the title show's soundtrack on a second kept channel |
 | `video.py` | `load_clip`, which decodes one of the title screen's two clips (the curtains and the show) once through PyAV (`av`) into a list of frames, and `IdleVideo`, which picks the frame to show from the time and counts the shows started |
-| `pi2.py`, `buttonhandler.py`, `pi_sound.py` | Real GPIO on the Pi (button, LEDs) through `RPi.GPIO` from `rpi-lgpio` |
-| `pi_dev2.py` | Fake GPIO: logs LED changes; the spacebar stands in for the button |
+| `lights.py` | The light strip behind the screen: its five effects, `Lights` (the scene showing now), and `strip_bytes`, which turns colours into the SPI bytes the strip reads ([docs/light-strip.md](docs/light-strip.md)) |
+| `pi2.py`, `buttonhandler.py`, `pi_sound.py` | Real GPIO on the Pi (button, LEDs, and the light strip over SPI through `spidev`) through `RPi.GPIO` from `rpi-lgpio` |
+| `pi_dev2.py` | Fake GPIO: logs LED changes, ignores the light strip; the spacebar stands in for the button |
 | `picker.py`, `pi.py`, `pi_dev.py` | The first version of the game; only each other import them, and nothing the game runs imports any of them |
 | `tests/` | The scripted test suite and its fakes ([docs/testing.md](docs/testing.md)) |
 | `assets/`, `sounds/` | Prize card images, backgrounds, the font, and sound effects |
@@ -34,7 +35,7 @@ The task starts once each note and skill it touches is in your context.
 ## Running it
 
 **On a Mac**, from the repo folder: `HALLOWEEN_DEV=1 uv run python game.py`. Dev mode uses `pi_dev2.py` in a
-window: spacebar is the button, Esc quits. Add `SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy` in front to run
+window: spacebar is the button, Esc quits, and the black mat under the picture shows every LED as a dot. Add `SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy` in front to run
 with no window and no sound.
 
 **Tests**: `uv run pytest`. Read [docs/testing.md](docs/testing.md) before adding or changing one.

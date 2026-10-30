@@ -22,6 +22,11 @@ class HardwareConfig:
     RGB_LED_PINS = [6, 13, 19, 26]      # BCM pin numbers for individual LEDs (pins 31, 33, 35, 37)
     NUM_RGB_LEDS = 4                    # Number of individual LEDs
 
+    # Light strip behind the screen (see LightsConfig): its data goes out the SPI data pin, GPIO10 (physical pin 19)
+    STRIP_SPI_BUS = 0                   # /dev/spidev0.0, there once dtparam=spi=on is set in /boot/firmware/config.txt
+    STRIP_SPI_DEVICE = 0
+    STRIP_SPI_HZ = 6_400_000            # 8 SPI bits make one strip bit, 1.25 us long
+
     # Timing
     FLASH_FREQ = 0.1                    # LED flash frequency in seconds
     BUTTON_COOLDOWN = 0.1               # Button debounce/cooldown time in seconds
@@ -212,9 +217,41 @@ class AudioConfig:
 
 
 # =============================================================================
+# LIGHT STRIP CONFIGURATION
+# =============================================================================
+
+class LightsConfig:
+    """The addressable LED strip behind the screen: what each screen lights it with"""
+
+    NUM_LEDS = 18                       # LEDs on the strip
+    MAX_BRIGHTNESS = 0.4                # No scene goes brighter than this share of full (power and glare)
+
+    # A scene is one effect from lights.py and how it looks: its colours, speed (1.0 = the effect's normal pace)
+    # and brightness (0.0 to MAX_BRIGHTNESS). Effects: flicker, heartbeat, pulse, wave, chase
+    SCENES = {
+        "fire":    {"effect": "flicker",   "colors": [(255, 70, 0), (160, 15, 0)], "speed": 1.0, "brightness": 0.35},
+        "dread":   {"effect": "heartbeat", "colors": [(200, 0, 0)],                "speed": 1.0, "brightness": 0.3},
+        "ember":   {"effect": "pulse",     "colors": [(255, 90, 0)],               "speed": 0.5, "brightness": 0.3},
+        "toxic":   {"effect": "wave",      "colors": [(120, 255, 0), (0, 60, 0)],  "speed": 0.6, "brightness": 0.3},
+        "jackpot": {"effect": "chase",     "colors": [(255, 0, 0), (255, 120, 0), (120, 255, 0), (150, 0, 255)],
+                    "speed": 2.0, "brightness": 0.4},
+    }
+
+    TITLE = "fire"                      # The title screen's scene
+    SPIN = "dread"                      # The spin's scene: it speeds up with the cards, and brightens to MAX_BRIGHTNESS
+                                        # as the countdown runs down
+    SPIN_FASTEST_SPEED = 3.0            # The spin scene's speed is multiplied by this once the cards are at their fastest
+    WINNER = {                          # The winner screen's scene, by the prize won
+        "mini": "ember",
+        "playdough": "toxic",
+        "big_prize": "jackpot",
+    }
+
+
+# =============================================================================
 # CONVENIENCE EXPORTS
 # =============================================================================
-# Import these directly: from config import HW, GAME, VISUAL, AUDIO, MESSAGES, PRIZES
+# Import these directly: from config import HW, GAME, VISUAL, AUDIO, MESSAGES, PRIZES, LIGHTS
 
 HW = HardwareConfig
 GAME = GameConfig
@@ -222,3 +259,4 @@ VISUAL = VisualConfig
 AUDIO = AudioConfig
 MESSAGES = MessagesConfig
 PRIZES = PrizesConfig
+LIGHTS = LightsConfig

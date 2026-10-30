@@ -69,3 +69,18 @@ changes an earlier one says so.
 23. **The picture sits against the top edge** (Drew, 2026-10-30; changes decision 22): Drew's frame around the
     screen needs it top aligned. It stays centred left to right, so the mat runs down both sides and along the
     bottom.
+
+## 2026-10-30
+
+24. **An addressable LED strip glows behind the screen**, 18 LEDs of a 5 V WS2812B-family strip, never at full white.
+    `config.py` drives it: `LIGHTS.SCENES` names scenes (an effect from `lights.py` with its colours, speed and
+    brightness), and each screen names its scene. The title shows `fire`; the spin shows `dread`, a heartbeat that
+    speeds up with the cards and brightens in the countdown; the winner screen's scene is the prize's. The four
+    cabinet LEDs and the LED on GPIO 27 keep doing what they did.
+25. **The game loop sends the strip its colours**, once a frame, over SPI on GPIO10 through `spidev`, with the
+    signal built in `lights.py`. Not a background thread (harder to test and to read), and not Adafruit's
+    `neopixel_spi` or `Pi5Neo` (neither is a Debian package). If SPI will not open, the game plays on with the
+    strip dark.
+26. **The strip is wired with no level shifter**, Drew having none; a diode in its 5 V wire is the first fix if it
+    flickers.
+27. **Dev mode shows every LED** as a dot in the black mat under the picture, so scenes can be tuned on a Mac.

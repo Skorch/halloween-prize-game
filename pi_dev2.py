@@ -62,6 +62,11 @@ def clear_rgb_leds():
     logger.info(f"rgb cleared")
 
 
+def set_strip(colours):
+    # The light strip changes every frame, too often to log; dev mode shows it in the mat under the picture instead
+    pass
+
+
 def play_winner():
     logger.info("Winner Sound")
     return

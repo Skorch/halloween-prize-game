@@ -11,13 +11,14 @@ in a scratch environment with pytest added), before the clips were added.
 
 | Parameter | On the Pi | In a test | What the test does with it |
 |---|---|---|---|
-| `hardware` | the `pi2` module | `FakeHardware` | reads `calls` (every LED change); `edge(high)` and `clean_press()` drive the game's button callback |
+| `hardware` | the `pi2` module | `FakeHardware` | reads `calls` (every LED change) and `strip` (the light strip's colours, one list each frame, kept apart from `calls`); `edge(high)` and `clean_press()` drive the game's button callback |
 | `clock` | `time.time` | `FakeClock` | `advance(seconds)`; nothing in the game waits on real time |
 | `rng` | `random.Random()` | `random.Random(seed)` or `ScriptedPicks([...])` | a seed gives the same picks every run; `ScriptedPicks` names each prize type in order |
 | `audio` | `PygameAudio` | `FakeAudio` | reads `played`, the file name of each sound in order; `looping`, the sound looping now or `None`; and `show`, the show's soundtrack or `None` |
 | `fullscreen` | `True` | `False` | |
 | `idle_video_files` | `(VISUAL.IDLE_CURTAIN_FILE, VISUAL.IDLE_SHOW_FILE)` | `None`, unless the test passes a pair | `None` shows the still background. Decoding the 12 s show takes seconds, so most video and sound tests pass the 2 s curtain clip as both clips; only `test_title_shows_the_curtains_then_the_show_then_the_curtains` and `test_game_runs_a_frame_on_fakes` decode the real show |
 | `idle_sound_file` | `VISUAL.IDLE_SOUND_FILE` | the same, unless the test passes `None` | `FakeAudio` loads it as its file name, so the title's loop shows in `looping` |
+| `show_outputs` | `False` (`True` in dev mode) | `False`, unless the test passes `True` | draws every LED as a dot in the mat; `game.output_dot_centres(size)` says where |
 | `show_sound_file` | `VISUAL.IDLE_SHOW_SOUND_FILE` | the same, unless the test passes `None` | `FakeAudio` records it in `show` and counts it in `shows_started` each time a show begins |
 
 `tests/conftest.py` sets SDL's `dummy` video and audio drivers before pygame starts, and moves into the repo
@@ -49,7 +50,8 @@ def test_press_starts_a_spin(make_game, hardware, audio, snap):
 
 ## What the suite does not cover
 
-- **The real pins** (`pi2.py`), real sound (`audio.py`'s `PygameAudio`, which SDL's `dummy` driver plays into
+- **The real pins** (`pi2.py`), including the light strip's signal reaching the strip, its timing, and the game
+  playing on when SPI will not open (`tests/test_lights.py` checks the bytes `strip_bytes` makes), real sound (`audio.py`'s `PygameAudio`, which SDL's `dummy` driver plays into
   nothing), and `game.main()`. Four tests in `tests/test_idle_sound.py` use `PygameAudio` on that driver to check
   which mixer channel each sound plays on; only the Pi shows how the sounds sound together. The button's
   bounce is covered only as far as the two recorded presses go.
