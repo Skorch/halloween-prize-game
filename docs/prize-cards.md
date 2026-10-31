@@ -7,8 +7,8 @@ The cards the spin flicks through and the winner screen shows. The 2026 set was 
 | Folder | Prize level | Cards |
 |---|---|---|
 | `assets/candy_2026/` | Mini candy | 8: disappointed kid monsters, each holding out one tiny candy |
-| `assets/playdough_2026/` | Mini boss | 6: smug monsters shoving a tub of dough at the viewer |
-| `assets/fullsize_2026/` | Final boss | 4: looming bosses shoving a full-size bar at the viewer |
+| `assets/playdough_2026/` | Playdough | 6: smug monsters shoving a tub of dough at the viewer |
+| `assets/fullsize_2026/` | Full size | 4: looming bosses shoving a full-size bar at the viewer |
 
 `config.PRIZES.PRIZE_CATEGORIES` names these folders. The 2025 cards stay in `assets/candy/`, `assets/playdough/` and
 `assets/fullsize/`.
@@ -27,7 +27,7 @@ canvas, and `render()` stretches the canvas back to 4:3, so the card shows at it
   wood, dim amber bulbs). Every card of a level gets the same frame, so the level reads in a split second.
 
 The script makes the frame's magenta centre see-through, scales the painting to fill it, lays the frame on top,
-and stamps the level ("MINI CANDY", "MINI BOSS", "FINAL BOSS") on the top plaque and the character's name on the
+and stamps the level ("MINI CANDY", "PLAYDOUGH", "FULL SIZE") on the top plaque and the character's name on the
 bottom plaque, in the game's Creepster font. It needs Pillow, which the game does not:
 
 ```

@@ -34,7 +34,7 @@ LEVELS = {
     },
     "mini_boss": {
         "frame": ROOT / "assets/card_frames/mini_boss.png",
-        "title": "MINI BOSS",
+        "title": "PLAYDOUGH",
         "title_box": (1017, 120, 1512, 227),
         "name_box": (753, 1566, 1638, 1691),
         "fill": (120, 255, 60), "stroke": (12, 30, 8),
@@ -42,7 +42,7 @@ LEVELS = {
     },
     "final_boss": {
         "frame": ROOT / "assets/card_frames/final_boss.png",
-        "title": "FINAL BOSS",
+        "title": "FULL SIZE",
         "title_box": (1000, 82, 1400, 176),
         "name_box": (820, 1606, 1590, 1716),
         "fill": (245, 90, 35), "stroke": (25, 5, 2),
