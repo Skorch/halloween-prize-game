@@ -112,3 +112,6 @@ changes an earlier one says so.
     canvas, as the title video is scaled, so a 4:3 card shows at its shape on the 4:3 display; before, they kept
     a card's shape on the square canvas, which left a 4:3 card squashed above a black band. How the cards are made:
     [prize-cards.md](prize-cards.md).
+37. **The game starts by itself when the Pi's desktop loads, and pulls first** (Drew, 2026-10-30). A line in the
+    Pi's `~/.config/labwc/autostart` pulls `main` from GitHub, then runs `launch.sh`; a pull that fails, such as
+    with no network, still starts the game on the code it has. Before, only the desktop icon started it.

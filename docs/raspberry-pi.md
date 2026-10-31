@@ -30,7 +30,7 @@ To find it when the name does not answer: `dns-sd -B _workstation._tcp local.` l
 | Processor use | One core at 17% on the title screen, with each frame sent to the display once; 30% before that change, and 105% before the loop was capped at 30 frames a second (2026-10-26; the game's own processor time from `/proc/<pid>/stat` over 66 s, three title loops) |
 | Restarting the game over SSH | `XAUTHORITY=/home/pi/.Xauthority WAYLAND_DISPLAY=wayland-0 XDG_RUNTIME_DIR=/run/user/1000 setsid nohup ./launch.sh > ~/game.log 2>&1 < /dev/null &` from the repo folder starts it on the display; the SSH command does not return by itself afterwards, and stopping it leaves the game running |
 | Repo folder | `/home/pi/Documents/halloween-prize-game` |
-| Started by | `launch.sh`, from the desktop session: the game's output goes to `~/.xsession-errors`. What starts `launch.sh` at boot is not known: no systemd service names the game and `pi`'s crontab is empty |
+| Started by | The desktop, at login, from a line in `~/.config/labwc/autostart` (2026-10-30): it waits up to 30 s for the network (`nm-online`), runs `git pull --ff-only` for up to 30 s with its output in `~/pull.log`, then runs `launch.sh` whether the pull worked or not. The desktop session runs that file because `/usr/bin/labwc-pi` starts `labwc -m`. `~/.config/labwc/autostart.bak` is the file from before the line. `~/Desktop/halloween-game.desktop` also runs `launch.sh`, by hand |
 | Display | HDMI, "TXD Display"; it prefers 1280x800. The game asks for 1000x666 fullscreen (`config.GAME.FULLSCREEN_MODE`) and gets 1024x768, as `~/.xsession-errors` shows: `Display: 1024x768, Game canvas: 1024x1024, Screen: 1024x768`. The window events at startup make pygame swap the display surface for a new one (2026-10-26), so `render()` draws onto `pygame.display.get_surface()` each frame, not onto the surface `set_mode` returned. The picture fills `config.GAME.SCREEN_SCALE` (0.91) of that surface's width and height, centred left to right and against the top edge, in a black mat. The display does not report its size in cm (its EDID gives 0 x 0), so 0.91 assumes a 10.1" screen, about 21.7 cm wide. Drew checked 0.91, top-aligned, on the Pi on 2026-10-30: it fits the frame around the screen |
 
 `/home/pi/Documents/halloween-prize-game-backup-20251030-181252` is an old copy whose git history is
@@ -43,6 +43,9 @@ The Pi has no GitHub login, so it pulls and never pushes:
 1. Commit and push from the Mac.
 2. On the Pi: `ssh pi@halloween.local 'cd ~/Documents/halloween-prize-game && git pull --ff-only'`.
 3. Restart the game, and press the real button to check it.
+
+A reboot does steps 2 and 3's restart by itself: the game pulls at login before it starts (see "Started by"
+above), so whatever is on GitHub's `main` is what the next boot runs.
 
 When the Pi holds commits or edits of its own, carry them to the Mac first: commit on the Pi,
 `git bundle create /tmp/x.bundle origin/main..main`, copy the bundle over with `scp`, and
