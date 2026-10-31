@@ -10,6 +10,7 @@ there; Drew is the second. `AGENTS.md` and `CLAUDE.md` in this folder are symlin
 | [testing.md](testing.md) | The scripted test suite: how it runs, its fakes, and how to add a test |
 | [light-strip.md](light-strip.md) | The LED strip behind the screen: its scenes, wiring, and how the Pi sends it colours |
 | [prize-stock.md](prize-stock.md) | The prizes left: `stock.yaml` on the Pi, how the game counts down in it, and restocking |
+| [prize-cards.md](prize-cards.md) | The prize cards: where they are, how `tools/make_cards.py` builds them, and adding one |
 | [decisions.md](decisions.md) | Each decision Drew made, with its date; appended, never rewritten |
 
 ## Where a new fact goes

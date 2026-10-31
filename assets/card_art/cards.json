@@ -1,0 +1,110 @@
+[
+  {
+    "name": "Tiny Tut",
+    "level": "mini_candy",
+    "art": "assets/card_art/tiny_tut.jpg",
+    "out": "assets/candy_2026/tiny_tut.jpg"
+  },
+  {
+    "name": "Vlad the Empty-Handed",
+    "level": "mini_candy",
+    "art": "assets/card_art/vlad_the_empty_handed.jpg",
+    "out": "assets/candy_2026/vlad_the_empty_handed.jpg"
+  },
+  {
+    "name": "Bare-Bones Barry",
+    "level": "mini_candy",
+    "art": "assets/card_art/bare_bones_barry.jpg",
+    "out": "assets/candy_2026/bare_bones_barry.jpg"
+  },
+  {
+    "name": "Leftover Lenny",
+    "level": "mini_candy",
+    "art": "assets/card_art/leftover_lenny.jpg",
+    "out": "assets/candy_2026/leftover_lenny.jpg"
+  },
+  {
+    "name": "Howlin' Hank",
+    "level": "mini_candy",
+    "art": "assets/card_art/howlin_hank.jpg",
+    "out": "assets/candy_2026/howlin_hank.jpg"
+  },
+  {
+    "name": "Boo-Hoo Boris",
+    "level": "mini_candy",
+    "art": "assets/card_art/boo_hoo_boris.jpg",
+    "out": "assets/candy_2026/boo_hoo_boris.jpg"
+  },
+  {
+    "name": "Short-Circuit Stanley",
+    "level": "mini_candy",
+    "art": "assets/card_art/short_circuit_stanley.jpg",
+    "out": "assets/candy_2026/short_circuit_stanley.jpg"
+  },
+  {
+    "name": "Wilted Winnie",
+    "level": "mini_candy",
+    "art": "assets/card_art/wilted_winnie.jpg",
+    "out": "assets/candy_2026/wilted_winnie.jpg"
+  },
+  {
+    "name": "Mudpie Morty",
+    "level": "mini_boss",
+    "art": "assets/card_art/mudpie_morty.jpg",
+    "out": "assets/playdough_2026/mudpie_morty.jpg"
+  },
+  {
+    "name": "Bog Boy Bart",
+    "level": "mini_boss",
+    "art": "assets/card_art/bog_boy_bart.jpg",
+    "out": "assets/playdough_2026/bog_boy_bart.jpg"
+  },
+  {
+    "name": "Doughgor",
+    "level": "mini_boss",
+    "art": "assets/card_art/doughgor.jpg",
+    "out": "assets/playdough_2026/doughgor.jpg"
+  },
+  {
+    "name": "Grubby Gordo",
+    "level": "mini_boss",
+    "art": "assets/card_art/grubby_gordo.jpg",
+    "out": "assets/playdough_2026/grubby_gordo.jpg"
+  },
+  {
+    "name": "Squish Squid Sid",
+    "level": "mini_boss",
+    "art": "assets/card_art/squish_squid_sid.jpg",
+    "out": "assets/playdough_2026/squish_squid_sid.jpg"
+  },
+  {
+    "name": "Gloopy Gus",
+    "level": "mini_boss",
+    "art": "assets/card_art/gloopy_gus.jpg",
+    "out": "assets/playdough_2026/gloopy_gus.jpg"
+  },
+  {
+    "name": "Count Full-Size",
+    "level": "final_boss",
+    "art": "assets/card_art/count_full_size.jpg",
+    "out": "assets/fullsize_2026/count_full_size.jpg"
+  },
+  {
+    "name": "Lord Gourdon",
+    "level": "final_boss",
+    "art": "assets/card_art/lord_gourdon.jpg",
+    "out": "assets/fullsize_2026/lord_gourdon.jpg"
+  },
+  {
+    "name": "The Cocoa Colossus",
+    "level": "final_boss",
+    "art": "assets/card_art/the_cocoa_colossus.jpg",
+    "out": "assets/fullsize_2026/the_cocoa_colossus.jpg"
+  },
+  {
+    "name": "The Ringmaster",
+    "level": "final_boss",
+    "art": "assets/card_art/the_ringmaster.jpg",
+    "out": "assets/fullsize_2026/the_ringmaster.jpg"
+  }
+]

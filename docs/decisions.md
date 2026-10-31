@@ -105,3 +105,10 @@ changes an earlier one says so.
     of time. The winner screen stops the beep at once and plays the prize sound after `PRIZES.WIN_SOUND_DELAY`
     (0.5 s); `PRIZES.STOP_SOUND_FILE` can open that gap with a sound, and is `None` (silent) for now. The strip's prize
     scene still starts as the winner screen opens.
+36. **New prize cards for 2026, 4:3, filling the canvas** (Drew, 2026-10-30). Painted cards in
+    `assets/candy_2026/`, `assets/playdough_2026/` and `assets/fullsize_2026/` replace the 2025 cards in
+    `PRIZES.PRIZE_CATEGORIES`; the 2025 folders stay. Each prize level has one frame, so the level reads at the
+    spin's speed: chipped wood, slimed pewter, worn gold. The spin and winner screens now scale a card to the whole
+    canvas, as the title video is scaled, so a 4:3 card shows at its shape on the 4:3 display; before, they kept
+    a card's shape on the square canvas, which left a 4:3 card squashed above a black band. How the cards are made:
+    [prize-cards.md](prize-cards.md).

@@ -91,7 +91,7 @@ class CandyPicker(State):
 
             # pass
                 
-    def render(self, surface, limit_vertical=False):
+    def render(self, surface):
         cached_assets = self.game.image_cache
         # Clearing the screen by filling with a background color
         BLACK = (0, 0, 0)  # RGB value for black
@@ -104,26 +104,9 @@ class CandyPicker(State):
             if filename in cached_assets:
                 image = cached_assets[filename]
             else:
-                image = pygame.image.load(filename)
-                image_width, image_height = image.get_size()
-                aspect_ratio = image_width / image_height
-
-                if limit_vertical:
-                    # Scale based on the game's height
-                    new_height = self.game.GAME_H
-                    new_width = int(new_height * aspect_ratio)
-                else:
-                    # Scale based on the game's width
-                    new_width = self.game.GAME_W
-                    new_height = int(new_width / aspect_ratio)
-
-                
-                image = pygame.transform.smoothscale(image, (new_width, new_height))
-
-                # Clipping (for width only)
-                if new_width > self.game.GAME_W:
-                    x_offset = (new_width - self.game.GAME_W) // 2
-                    image = image.subsurface(pygame.Rect(x_offset, 0, self.game.GAME_W, new_height))
+                # Scale the card to the whole canvas, as the title video is scaled; render() stretches the canvas
+                # back to the display's 4:3, so a 4:3 card shows at its own shape
+                image = pygame.transform.smoothscale(pygame.image.load(filename), self.game.GAME_DIMENSIONS)
 
                 cached_assets[filename] = image
             # Blit the image and text overlay

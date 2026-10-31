@@ -29,9 +29,10 @@ The task starts once each note and skill it touches is in your context.
 | `pi2.py`, `buttonhandler.py`, `pi_sound.py` | Real GPIO on the Pi (button, LEDs, and the light strip over SPI through `spidev`) through `RPi.GPIO` from `rpi-lgpio` |
 | `pi_dev2.py` | Fake GPIO: logs LED changes, ignores the light strip; the spacebar stands in for the button |
 | `curtain_demo.py` | A test, run by hand, of the green-screen curtain clips in `assets/curtain/` drawn over a title show, such as `assets/idle/main-animation-no-curtain.mp4`; the game does not import it |
+| `tools/make_cards.py` | Builds the prize cards from their paintings and frames ([docs/prize-cards.md](docs/prize-cards.md)); run by hand on a Mac, the game does not import it |
 | `picker.py`, `pi.py`, `pi_dev.py` | The first version of the game; only each other import them, and nothing the game runs imports any of them |
 | `tests/` | The scripted test suite and its fakes ([docs/testing.md](docs/testing.md)) |
-| `assets/`, `sounds/` | Prize card images, backgrounds, the font, and sound effects |
+| `assets/`, `sounds/` | Prize card images (this year's in `assets/*_2026/`, built from `assets/card_art/` and `assets/card_frames/`), backgrounds, the font, and sound effects |
 | `docs/` | Facts the code does not say: the Pi, decisions. Start at [docs/README.md](docs/README.md) |
 
 ## Running it

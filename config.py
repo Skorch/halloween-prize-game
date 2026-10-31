@@ -165,12 +165,12 @@ class PrizesConfig:
     # =============================================================================
     PRIZE_CATEGORIES = {
         "mini": {
-            "folder": "assets/candy/*",
+            "folder": "assets/candy_2026/*",
             "title": "Mini Candy",
             "sound_file": "sounds/small_prize_candy.wav",
         },
         "playdough": {
-            "folder": "assets/playdough/*",
+            "folder": "assets/playdough_2026/*",
             "title": "Playdough",
             "sound_file": "sounds/small_prize_play.wav",
         },
@@ -180,7 +180,7 @@ class PrizesConfig:
             "sound_file": "sounds/big_prize_new.wav",
         },
         "full_size": {
-            "folder": "assets/fullsize/*",  # Update this path if you have full-size candy
+            "folder": "assets/fullsize_2026/*",
             "title": "Full Size Candy",
             "sound_file": "sounds/big_prize_new.wav",
         }
